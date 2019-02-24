@@ -66,7 +66,7 @@ u16 Math::Add(u16 a, u16 b, u8& flags)
 	bool z = flags & (u8)Flags::Z;
 	bool n = false;
 	bool h = ((a & 0x0FFF) + (b & 0x0FFF)) > 0x0FFF;
-	bool c = ((std::uint_least32_t)a + (std::uint_least32_t)b) > 0xFFFF;
+	bool c = ((u32)a + (u32)b) > 0xFFFF;
 
 	flags =
 		z ? (u8)Flags::Z : 0 |

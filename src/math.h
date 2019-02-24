@@ -8,7 +8,7 @@ struct Registers
 		struct
 		{
 			u8 A;
-			u8 F;
+			u8 F; // Flag register
 		};
 		u16 AF;
 	};
