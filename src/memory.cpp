@@ -10,6 +10,13 @@ u8 Memory::LoadU8(u16 address)
 	return memory[address];
 }
 
+u16 Memory::LoadU16(u16 address)
+{
+	u16 ret = memory[address];
+	ret |= (memory[address + 1] << 8);
+	return ret;
+}
+
 void Memory::LoadBootRom()
 {
 	std::ifstream file;

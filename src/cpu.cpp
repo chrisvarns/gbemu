@@ -1,54 +1,9 @@
 #include <assert.h>
 
 #include "cpu.h"
-#include "types.h"
+#include "math.h"
 #include "memory.h"
-
-struct Registers
-{
-	union
-	{
-		struct
-		{
-			u8 A;
-			u8 F; // Flag register
-		};
-		u16 AF;
-	};
-
-	union
-	{
-		struct
-		{
-			u8 B;
-			u8 C;
-		};
-		u16 BC;
-	};
-
-	union
-	{
-		struct
-		{
-			u8 D;
-			u8 E;
-		};
-		u16 DE;
-	};
-
-	union
-	{
-		struct
-		{
-			u8 H;
-			u8 L;
-		};
-		u16 HL;
-	};
-
-	u16 SP;
-	u16 PC = 0x00;
-};
+#include "types.h"
 
 Registers reg;
 
@@ -64,7 +19,6 @@ enum class Opcode : u8
 	LD_L_N = 0x2E,
 
 	// 2. LD r1,r2 (r1 = r2)
-	// @todo don't really understand what any of the immediate loads or (HL) variants are doing here.
 	LD_A_A = 0x7F,
 	LD_A_B = 0x78,
 	LD_A_C = 0x79,
@@ -120,86 +74,158 @@ enum class Opcode : u8
 	LD_$HL_E = 0x73,
 	LD_$HL_H = 0x74,
 	LD_$HL_L = 0x75,	LD_$HL_N = 0x36,
+
+	// 3.3.2 16-Bit Loads
+	// 1. LD n, nn
+	LD_BC_NN = 0x01,
+	LD_DE_NN = 0x11,
+	LD_HL_NN = 0x21,
+	LD_SP_NN = 0x31,
+
+	// 3.3.3 8-bit ALU
+	// 7. XOR n
+	XOR_A = 0xAF,
+	XOR_B = 0xA8,
+	XOR_C = 0xA9,
+	XOR_D = 0xAA,
+	XOR_E = 0xAB,
+	XOR_H = 0xAC,
+	XOR_L = 0xAD,
+	XOR_$HL = 0xAE,
+	XOR_N = 0xEE,
+
+	// 8. CP n (Compare)
+	CP_A = 0xBF,
+	CP_B = 0xB8,
+	CP_C = 0xB9,
+	CP_D = 0xBA,
+	CP_E = 0xBB,
+	CP_H = 0xBC,
+	CP_L = 0xBD,
+	CP_$HL = 0xBE,
+	CP_N = 0xFE
 };
 
 void CPU::step()
 {
 	// Get opcode from memory
 	Opcode opcode = (Opcode)Memory::LoadU8(reg.PC);
+	reg.PC++;
 
 	switch (opcode)
 	{
+	// 3.3.1 8-bit loads
+	// 1. LD r1,val (r1 = 8 bit immediate value)
 	case Opcode::LD_B_N:
 	{
 		reg.B = Memory::LoadU8(reg.PC);
 		reg.PC++;
+		break;
 	}
-	break;
 	case Opcode::LD_C_N:
 	{
 		reg.C = Memory::LoadU8(reg.PC);
 		reg.PC++;
+		break;
 	}
-	break;
 	case Opcode::LD_D_N:
 	{
 		reg.D = Memory::LoadU8(reg.PC);
 		reg.PC++;
+		break;
 	}
-	break;
 	case Opcode::LD_E_N:
 	{
 		reg.E = Memory::LoadU8(reg.PC);
 		reg.PC++;
+		break;
 	}
-	break;
 	case Opcode::LD_H_N:
 	{
 		reg.H = Memory::LoadU8(reg.PC);
 		reg.PC++;
+		break;
 	}
-	break;
 	case Opcode::LD_L_N:
 	{
 		reg.L = Memory::LoadU8(reg.PC);
 		reg.PC++;
+		break;
 	}
-	break;
+	// 2. LD r1,r2 (r1 = r2)
 	case Opcode::LD_A_A:
 	{
 		reg.A = reg.A;
+		break;
 	}
-	break;
 	case Opcode::LD_A_B:
 	{
 		reg.A = reg.B;
+		break;
 	}
-	break;
 	case Opcode::LD_A_C:
 	{
 		reg.A = reg.C;
+		break;
 	}
-	break;
 	case Opcode::LD_A_D:
 	{
 		reg.A = reg.D;
+		break;
 	}
-	break;
 	case Opcode::LD_A_E:
 	{
 		reg.A = reg.E;
+		break;
 	}
-	break;
 	case Opcode::LD_A_H:
 	{
 		reg.A = reg.H;
+		break;
 	}
-	break;
 	case Opcode::LD_A_L:
 	{
 		reg.A = reg.L;
+		break;
 	}
-	break;
+	// 3.3.2 16-Bit Loads
+	// 1. LD n, nn
+	case Opcode::LD_BC_NN:
+	{
+		assert(false && "Missing opcode");
+		break;
+	}
+	case Opcode::LD_DE_NN:
+	{
+		assert(false && "Missing opcode");
+		break;
+	}
+	case Opcode::LD_HL_NN:
+	{
+		assert(false && "Missing opcode");
+		break;
+	}
+	case Opcode::LD_SP_NN:
+	{
+		reg.SP = Memory::LoadU16(reg.PC);
+		reg.PC += 2;
+		break;
+	}
+	// 3.3.3 8-bit ALU
+	// 7. XOR n
+	case Opcode::XOR_A:
+	{
+		Math::Xor(reg.A);
+		break;
+	}
+	// 8. CP n (Compare)
+	case Opcode::CP_N:
+	{
+		u8 n = Memory::LoadU8(reg.PC);
+		reg.PC++;
+		Math::Compare(n);
+		break;
+	}
 	default:
 		assert(false && "Unknown opcode");
 		break;

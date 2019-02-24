@@ -10,23 +10,20 @@ namespace Math
 		H = 0x20,
 		C = 0x10
 	};
+	u8 Add(u8 a, u8 b);
+	u8 AddWithCarry(u8 a, u8 b);
+	u8 Sub(u8 val);
+	u16 Add(u16 a, u16 b);
 
-
-	u8 Add(u8 a, u8 b, u8& flags);
-	u8 AddWithCarry(u8 a, u8 b, u8& flags);
-	u8 Sub(u8 a, u8 b, u8& flags);
-	u16 Add(u16 a, u16 b, u8& flags);
-
-	u8 Inc(u8 a, u8& flags);
-	u8 Dec(u8 a, u8& flags);
+	u8 Inc(u8 a);
+	u8 Dec(u8 a);
 	u16 Inc(u16 a);
 	u16 Dec(u16 a);
 
-	u8 And(u8 a, u8 b, u8& flags);
-	u8 Or(u8 a, u8 b, u8& flags);
-	u8 Xor(u8 a, u8 b, u8& flags);
+	u8 And(u8 a, u8 b);
+	u8 Or(u8 a, u8 b);
+	u8 Xor(u8 val);
 
-
-	void Example();
+	void Compare(u8 val);
 }
 

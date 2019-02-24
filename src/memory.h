@@ -5,5 +5,7 @@ class Memory
 {
 public:
 	static u8 LoadU8(u16 address);
+	static u16 LoadU16(u16 address);
+
 	static void LoadBootRom();
 };
