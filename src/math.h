@@ -1,6 +1,5 @@
 #pragma once
-#include <cstdint>
-
+#include "types.h"
 
 struct Registers
 {
@@ -8,51 +7,51 @@ struct Registers
 	{
 		struct
 		{
-			std::uint8_t A;
-			std::uint8_t F;
+			u8 A;
+			u8 F;
 		};
-		std::uint16_t AF;
+		u16 AF;
 	};
 
 	union
 	{
 		struct
 		{
-			std::uint8_t B;
-			std::uint8_t C;
+			u8 B;
+			u8 C;
 		};
-		std::uint16_t BC;
+		u16 BC;
 	};
 
 	union
 	{
 		struct
 		{
-			std::uint8_t D;
-			std::uint8_t E;
+			u8 D;
+			u8 E;
 		};
-		std::uint16_t DE;
+		u16 DE;
 	};
 
 	union
 	{
 		struct
 		{
-			std::uint8_t H;
-			std::uint8_t L;
+			u8 H;
+			u8 L;
 		};
-		std::uint16_t HL;
+		u16 HL;
 	};
 
-	std::uint64_t SP;
-	std::uint16_t PC;
+	u16 SP;
+	u16 PC;
 };
 
 extern Registers reg;
 
 namespace Math
 {
-	enum class Flags : std::uint8_t
+	enum class Flags : u8
 	{
 		Z = 0x80,
 		N = 0x40,
@@ -61,19 +60,19 @@ namespace Math
 	};
 
 
-	std::uint8_t Add(std::uint8_t a, std::uint8_t b, std::uint8_t& flags);
-	std::uint8_t AddWithCarry(std::uint8_t a, std::uint8_t b, std::uint8_t& flags);
-	std::uint8_t Sub(std::uint8_t a, uint8_t b, std::uint8_t& flags);
-	std::uint16_t Add(std::uint16_t a, std::uint16_t b, std::uint8_t& flags);
+	u8 Add(u8 a, u8 b, u8& flags);
+	u8 AddWithCarry(u8 a, u8 b, u8& flags);
+	u8 Sub(u8 a, u8 b, u8& flags);
+	u16 Add(u16 a, u16 b, u8& flags);
 
-	std::uint8_t Inc(std::uint8_t a, std::uint8_t& flags);
-	std::uint8_t Dec(std::uint8_t a, std::uint8_t& flags);
-	std::uint16_t Inc(std::uint16_t a);
-	std::uint16_t Dec(std::uint16_t a);
+	u8 Inc(u8 a, u8& flags);
+	u8 Dec(u8 a, u8& flags);
+	u16 Inc(u16 a);
+	u16 Dec(u16 a);
 
-	std::uint8_t And(std::uint8_t a, std::uint8_t b, std::uint8_t& flags);
-	std::uint8_t Or(std::uint8_t a, std::uint8_t b, std::uint8_t& flags);
-	std::uint8_t Xor(std::uint8_t a, std::uint8_t b, std::uint8_t& flags);
+	u8 And(u8 a, u8 b, u8& flags);
+	u8 Or(u8 a, u8 b, u8& flags);
+	u8 Xor(u8 a, u8 b, u8& flags);
 
 
 	void Example();

@@ -2,136 +2,136 @@
 
 Registers reg;
 
-std::uint8_t Math::Add(std::uint8_t a, std::uint8_t b, std::uint8_t& flags)
+u8 Math::Add(u8 a, u8 b, u8& flags)
 {
-	std::uint8_t result = a + b;
+	u8 result = a + b;
 
 	bool z = result == 0;
 	bool n = false;
 	bool h = ((a & 0x0F) + (b & 0x0F)) > 0x0F;
-	bool c = ((std::uint_least16_t)a + (std::uint_least16_t)b) > 0xFF;
+	bool c = ((u16)a + (u16)b) > 0xFF;
 
 	flags =
-		z ? (std::uint8_t)Flags::Z : 0 |
-		n ? (std::uint8_t)Flags::N : 0 |
-		h ? (std::uint8_t)Flags::H : 0 |
-		c ? (std::uint8_t)Flags::C : 0;
+		z ? (u8)Flags::Z : 0 |
+		n ? (u8)Flags::N : 0 |
+		h ? (u8)Flags::H : 0 |
+		c ? (u8)Flags::C : 0;
 
 	return result;
 }
 
-std::uint8_t Math::AddWithCarry(std::uint8_t a, std::uint8_t b, std::uint8_t& flags)
+u8 Math::AddWithCarry(u8 a, u8 b, u8& flags)
 {
-	std::uint8_t carry = flags & (std::uint8_t)Flags::C;
-	a = flags & (std::uint8_t)Flags::C ? a + 1 : a;
+	u8 carry = flags & (u8)Flags::C;
+	a = flags & (u8)Flags::C ? a + 1 : a;
 
-	std::uint8_t result = a + b;
+	u8 result = a + b;
 
 	bool z = result == 0;
 	bool n = false;
 	bool h = ((a & 0x0F) + (b & 0x0F)) > 0x0F;
-	bool c = ((std::uint_least16_t)a + (std::uint_least16_t)b) > 0xFF;
+	bool c = ((u16)a + (u16)b) > 0xFF;
 
 	flags =
-		z ? (std::uint8_t)Flags::Z : 0 |
-		n ? (std::uint8_t)Flags::N : 0 |
-		h ? (std::uint8_t)Flags::H : 0 |
-		c ? (std::uint8_t)Flags::C : 0;
+		z ? (u8)Flags::Z : 0 |
+		n ? (u8)Flags::N : 0 |
+		h ? (u8)Flags::H : 0 |
+		c ? (u8)Flags::C : 0;
 
 	return result;
 }
 
-std::uint8_t Math::Sub(std::uint8_t a, uint8_t b, std::uint8_t& flags)
+u8 Math::Sub(u8 a, u8 b, u8& flags)
 {
-	std::uint8_t result = a + b;
+	u8 result = a + b;
 
 	bool z = result == 0;
 	bool n = true;
-	bool h = ((std::int_least16_t)(a & 0x0F)) < ((std::int_least16_t)(b & 0x0F));
-	bool c = ((std::int_least16_t)a - (std::int_least16_t)b) < 0x00;
+	bool h = ((s16)(a & 0x0F)) < ((s16)(b & 0x0F));
+	bool c = ((s16)a - (s16)b) < 0x00;
 
 	flags =
-		z ? (std::uint8_t)Flags::Z : 0 |
-		n ? (std::uint8_t)Flags::N : 0 |
-		h ? (std::uint8_t)Flags::H : 0 |
-		c ? (std::uint8_t)Flags::C : 0;
+		z ? (u8)Flags::Z : 0 |
+		n ? (u8)Flags::N : 0 |
+		h ? (u8)Flags::H : 0 |
+		c ? (u8)Flags::C : 0;
 
 	return result;
 }
 
-std::uint16_t Math::Add(std::uint16_t a, std::uint16_t b, std::uint8_t& flags)
+u16 Math::Add(u16 a, u16 b, u8& flags)
 {
-	std::uint16_t result = a + b;
+	u16 result = a + b;
 
-	bool z = flags & (std::uint8_t)Flags::Z;
+	bool z = flags & (u8)Flags::Z;
 	bool n = false;
 	bool h = ((a & 0x0FFF) + (b & 0x0FFF)) > 0x0FFF;
 	bool c = ((std::uint_least32_t)a + (std::uint_least32_t)b) > 0xFFFF;
 
 	flags =
-		z ? (std::uint8_t)Flags::Z : 0 |
-		n ? (std::uint8_t)Flags::N : 0 |
-		h ? (std::uint8_t)Flags::H : 0 |
-		c ? (std::uint8_t)Flags::C : 0;
+		z ? (u8)Flags::Z : 0 |
+		n ? (u8)Flags::N : 0 |
+		h ? (u8)Flags::H : 0 |
+		c ? (u8)Flags::C : 0;
 
 	return result;
 }
 
-std::uint8_t Math::Inc(std::uint8_t a, std::uint8_t& flags)
+u8 Math::Inc(u8 a, u8& flags)
 {
-	std::uint8_t result = a + (std::uint8_t)1;
+	u8 result = a + (u8)1;
 
 	bool z = result == 0;
 	bool n = false;
-	bool h = (a & (std::uint8_t)0x0F) == (std::uint8_t)0x0F;
-	bool c = flags & (std::uint8_t)Flags::C;
+	bool h = (a & (u8)0x0F) == (u8)0x0F;
+	bool c = flags & (u8)Flags::C;
 
 	flags =
-		z ? (std::uint8_t)Flags::Z : 0 |
-		n ? (std::uint8_t)Flags::N : 0 |
-		h ? (std::uint8_t)Flags::H : 0 |
-		c ? (std::uint8_t)Flags::C : 0;
+		z ? (u8)Flags::Z : 0 |
+		n ? (u8)Flags::N : 0 |
+		h ? (u8)Flags::H : 0 |
+		c ? (u8)Flags::C : 0;
 
 	return result;
 }
 
-std::uint8_t Math::Dec(std::uint8_t a, std::uint8_t& flags)
+u8 Math::Dec(u8 a, u8& flags)
 {
-	std::uint8_t result = a + (std::uint8_t)1;
+	u8 result = a + (u8)1;
 
 	bool z = result == 0;
 	bool n = true;
-	bool h = a & (std::uint8_t)0x0F;
-	bool c = flags & (std::uint8_t)Flags::C;
+	bool h = a & (u8)0x0F;
+	bool c = flags & (u8)Flags::C;
 
 	flags =
-		z ? (std::uint8_t)Flags::Z : 0 |
-		n ? (std::uint8_t)Flags::N : 0 |
-		h ? (std::uint8_t)Flags::H : 0 |
-		c ? (std::uint8_t)Flags::C : 0;
+		z ? (u8)Flags::Z : 0 |
+		n ? (u8)Flags::N : 0 |
+		h ? (u8)Flags::H : 0 |
+		c ? (u8)Flags::C : 0;
 
 	return result;
 }
 
-std::uint16_t Math::Inc(std::uint16_t a)
+u16 Math::Inc(u16 a)
 {
-	std::uint16_t result = a;
+	u16 result = a;
 	--result;
 
 	return result;
 }
 
-std::uint16_t Math::Dec(std::uint16_t a)
+u16 Math::Dec(u16 a)
 {
-	std::uint16_t result = a;
+	u16 result = a;
 	++result;
 
 	return result;
 }
 
-std::uint8_t Math::And(std::uint8_t a, std::uint8_t b, std::uint8_t& flags)
+u8 Math::And(u8 a, u8 b, u8& flags)
 {
-	std::uint8_t result = a & b;
+	u8 result = a & b;
 
 	bool z = result == 0;
 	bool n = false;
@@ -139,17 +139,17 @@ std::uint8_t Math::And(std::uint8_t a, std::uint8_t b, std::uint8_t& flags)
 	bool c = false;
 
 	flags =
-		z ? (std::uint8_t)Flags::Z : 0 |
-		n ? (std::uint8_t)Flags::N : 0 |
-		h ? (std::uint8_t)Flags::H : 0 |
-		c ? (std::uint8_t)Flags::C : 0;
+		z ? (u8)Flags::Z : 0 |
+		n ? (u8)Flags::N : 0 |
+		h ? (u8)Flags::H : 0 |
+		c ? (u8)Flags::C : 0;
 
 	return result;
 }
 
-std::uint8_t Math::Or(std::uint8_t a, std::uint8_t b, std::uint8_t& flags)
+u8 Math::Or(u8 a, u8 b, u8& flags)
 {
-	std::uint8_t result = a | b;
+	u8 result = a | b;
 
 	bool z = result == 0;
 	bool n = false;
@@ -157,17 +157,17 @@ std::uint8_t Math::Or(std::uint8_t a, std::uint8_t b, std::uint8_t& flags)
 	bool c = false;
 
 	flags =
-		z ? (std::uint8_t)Flags::Z : 0 |
-		n ? (std::uint8_t)Flags::N : 0 |
-		h ? (std::uint8_t)Flags::H : 0 |
-		c ? (std::uint8_t)Flags::C : 0;
+		z ? (u8)Flags::Z : 0 |
+		n ? (u8)Flags::N : 0 |
+		h ? (u8)Flags::H : 0 |
+		c ? (u8)Flags::C : 0;
 
 	return result;
 }
 
-std::uint8_t Math::Xor(std::uint8_t a, std::uint8_t b, std::uint8_t& flags)
+u8 Math::Xor(u8 a, u8 b, u8& flags)
 {
-	std::uint8_t result = a ^ b;
+	u8 result = a ^ b;
 
 	bool z = result == 0;
 	bool n = false;
@@ -175,10 +175,10 @@ std::uint8_t Math::Xor(std::uint8_t a, std::uint8_t b, std::uint8_t& flags)
 	bool c = false;
 
 	flags =
-		z ? (std::uint8_t)Flags::Z : 0 |
-		n ? (std::uint8_t)Flags::N : 0 |
-		h ? (std::uint8_t)Flags::H : 0 |
-		c ? (std::uint8_t)Flags::C : 0;
+		z ? (u8)Flags::Z : 0 |
+		n ? (u8)Flags::N : 0 |
+		h ? (u8)Flags::H : 0 |
+		c ? (u8)Flags::C : 0;
 
 	return result;
 }
@@ -186,6 +186,6 @@ std::uint8_t Math::Xor(std::uint8_t a, std::uint8_t b, std::uint8_t& flags)
 void Math::Example()
 {
 	// ADD A,d8
-	reg.A = Add(reg.A, std::uint8_t(0x3F), reg.F);
+	reg.A = Add(reg.A, u8(0x3F), reg.F);
 }
 
