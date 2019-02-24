@@ -1,11 +1,12 @@
 #pragma once
 #include "types.h"
 
-class Memory
+namespace Memory
 {
-public:
-	static u8 LoadU8(u16 address);
-	static u16 LoadU16(u16 address);
+	u8 LoadU8(u16 address);
+	u16 LoadU16(u16 address);
 
-	static void LoadBootRom();
+	void StoreU8(u16 address, u8 val);
+
+	void LoadBootRom();
 };

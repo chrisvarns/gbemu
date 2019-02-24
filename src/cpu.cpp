@@ -75,6 +75,9 @@ enum class Opcode : u8
 	LD_$HL_H = 0x74,
 	LD_$HL_L = 0x75,	LD_$HL_N = 0x36,
 
+	// 10/11/12 Load A into HL and decrement HL
+	LD_$HLD_A = 0x32,
+
 	// 3.3.2 16-Bit Loads
 	// 1. LD n, nn
 	LD_BC_NN = 0x01,
@@ -188,27 +191,31 @@ void CPU::step()
 		reg.A = reg.L;
 		break;
 	}
+	// 10/11/12 Load A into HL and decrement HL
+	case Opcode::LD_$HLD_A:
+	{
+		Memory::StoreU8(reg.HL, reg.A);
+		reg.HL--;
+		break;
+	}
 	// 3.3.2 16-Bit Loads
 	// 1. LD n, nn
 	case Opcode::LD_BC_NN:
 	{
 		reg.BC = Memory::LoadU16(reg.PC);
 		reg.PC += 2;
-		assert(false && "Missing opcode");
 		break;
 	}
 	case Opcode::LD_DE_NN:
 	{
 		reg.DE = Memory::LoadU16(reg.PC);
 		reg.PC += 2;
-		assert(false && "Missing opcode");
 		break;
 	}
 	case Opcode::LD_HL_NN:
 	{
 		reg.HL = Memory::LoadU16(reg.PC);
 		reg.PC += 2;
-		assert(false && "Missing opcode");
 		break;
 	}
 	case Opcode::LD_SP_NN:

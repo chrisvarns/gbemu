@@ -17,6 +17,11 @@ u16 Memory::LoadU16(u16 address)
 	return ret;
 }
 
+void Memory::StoreU8(u16 address, u8 val)
+{
+	memory[address] = val;
+}
+
 void Memory::LoadBootRom()
 {
 	std::ifstream file;
