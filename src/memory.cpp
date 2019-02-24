@@ -17,6 +17,18 @@ u16 Memory::LoadU16(u16 address)
 	return ret;
 }
 
+s8 Memory::LoadS8(u16 address)
+{
+	return (s8)memory[address];
+}
+
+s16 Memory::LoadS16(u16 address)
+{
+	s16 ret = s16(memory[address]);
+	ret |= (s16(memory[address + 1]) << 8);
+	return ret;
+}
+
 void Memory::StoreU8(u16 address, u8 val)
 {
 	memory[address] = val;

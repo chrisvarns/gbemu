@@ -42,7 +42,8 @@ enum class Opcode : u8
 	LD_C_L = 0x4D,
 	LD_C_$HL = 0x4E,
 	LD_D_B = 0x50,
-	LD_D_C = 0x51,	LD_D_D = 0x52,
+	LD_D_C = 0x51,
+	LD_D_D = 0x52,
 	LD_D_E = 0x53,
 	LD_D_H = 0x54,
 	LD_D_L = 0x55,
@@ -73,7 +74,8 @@ enum class Opcode : u8
 	LD_$HL_D = 0x72,
 	LD_$HL_E = 0x73,
 	LD_$HL_H = 0x74,
-	LD_$HL_L = 0x75,	LD_$HL_N = 0x36,
+	LD_$HL_L = 0x75,
+	LD_$HL_N = 0x36,
 
 	// 10/11/12 Load A into HL and decrement HL
 	LD_$HLD_A = 0x32,
@@ -106,8 +108,29 @@ enum class Opcode : u8
 	CP_H = 0xBC,
 	CP_L = 0xBD,
 	CP_$HL = 0xBE,
-	CP_N = 0xFE
+	CP_N = 0xFE,
+
+	// 3.3.8 Jumps
+	// 5. JR cc,n
+	JR_NZ_N = 0x20,
+	JR_Z_N = 0x28,
+	JR_NC_N = 0x30,
+	JR_C_N = 0x38,
+
+	// Prefix Bytes
+	PREFIX_CB = 0xCB,
+	PREFIX_DD = 0xDD,
+	PREFIX_ED = 0xED,
+	PREFIX_FD = 0xFD,
 };
+
+enum class Opcode_CB : u8
+{
+	// BIT
+	BIT_7_H = 0x7C,
+};
+
+void ProcessOpcodeCB();
 
 void CPU::step()
 {
@@ -237,6 +260,43 @@ void CPU::step()
 		u8 n = Memory::LoadU8(reg.PC);
 		reg.PC++;
 		Math::Compare(n);
+		break;
+	}
+	// 3.3.8 Jumps
+	// 5. JR cc,n
+	case Opcode::JR_NZ_N:
+	{
+		s8 n = Memory::LoadS8(reg.PC);
+		reg.PC++; // The immediate value is part of the instruction
+		if (!(reg.F & (u8)Flags::Z))
+		{
+			reg.PC += n;
+		}
+		break;
+	}
+	case Opcode::PREFIX_CB:
+	case Opcode::PREFIX_DD:
+	case Opcode::PREFIX_ED:
+	case Opcode::PREFIX_FD:
+	{
+		ProcessOpcodeCB();
+		break;
+	}
+	default:
+		assert(false && "Unknown opcode");
+		break;
+	}
+}
+
+void ProcessOpcodeCB()
+{
+	Opcode_CB opcode_cb = (Opcode_CB)Memory::LoadU8(reg.PC);
+	reg.PC++;
+	switch (opcode_cb)
+	{
+	case Opcode_CB::BIT_7_H:
+	{
+		Math::Bit(reg.H, 7);
 		break;
 	}
 	default:

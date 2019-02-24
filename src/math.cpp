@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include "math.h"
 #include "cpu.h"
 
@@ -167,11 +169,11 @@ namespace Math
 		return result;
 	}
 
-	u8 Xor(u8 val)
+	void Xor(u8 val)
 	{
-		u8 result = reg.A ^ val;
+		reg.A ^= val;
 
-		bool z = result == 0;
+		bool z = reg.A == 0;
 		bool n = false;
 		bool h = false;
 		bool c = false;
@@ -181,8 +183,6 @@ namespace Math
 			n ? (u8)Flags::N : 0 |
 			h ? (u8)Flags::H : 0 |
 			c ? (u8)Flags::C : 0;
-
-		return result;
 	}
 
 	void Compare(u8 val)
@@ -201,10 +201,21 @@ namespace Math
 			c ? (u8)Flags::C : 0;
 	}
 
-	void Example()
+	void Bit(u8 val, u8 bit)
 	{
-		// ADD A,d8
-		// reg.A = Add(reg.A, u8(0x3F), reg.F);
-	}
+		assert(bit >= 0 && bit <= 7);
 
+		u8 bitmask = 1 << bit;
+
+		bool z = !(val & bitmask);
+		bool n = false;
+		bool h = true;
+		bool c = reg.F & (u8)Flags::C;
+
+		reg.F =
+			z ? (u8)Flags::Z : 0 |
+			n ? (u8)Flags::N : 0 |
+			h ? (u8)Flags::H : 0 |
+			c ? (u8)Flags::C : 0;
+	}
 }
