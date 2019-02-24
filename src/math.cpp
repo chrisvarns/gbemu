@@ -184,6 +184,6 @@ u8 Math::Xor(u8 a, u8 b, u8& flags)
 void Math::Example()
 {
 	// ADD A,d8
-	reg.A = Add(reg.A, u8(0x3F), reg.F);
+	// reg.A = Add(reg.A, u8(0x3F), reg.F);
 }
 
