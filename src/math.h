@@ -48,9 +48,7 @@ struct Registers
 	std::uint16_t PC;
 };
 
-
-Registers reg;
-
+extern Registers reg;
 
 namespace Math
 {
@@ -78,10 +76,6 @@ namespace Math
 	std::uint8_t Xor(std::uint8_t a, std::uint8_t b, std::uint8_t& flags);
 
 
-	void Example()
-	{
-		// ADD A,d8
-		reg.A = Add(reg.A, std::uint8_t(0x3F), reg.F);
-	}
+	void Example();
 }
 

@@ -1,5 +1,6 @@
 #include "math.h"
 
+Registers reg;
 
 std::uint8_t Math::Add(std::uint8_t a, std::uint8_t b, std::uint8_t& flags)
 {
@@ -180,5 +181,11 @@ std::uint8_t Math::Xor(std::uint8_t a, std::uint8_t b, std::uint8_t& flags)
 		c ? (std::uint8_t)Flags::C : 0;
 
 	return result;
+}
+
+void Math::Example()
+{
+	// ADD A,d8
+	reg.A = Add(reg.A, std::uint8_t(0x3F), reg.F);
 }
 
