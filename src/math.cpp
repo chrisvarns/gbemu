@@ -1,7 +1,5 @@
 #include "math.h"
 
-Registers reg;
-
 u8 Math::Add(u8 a, u8 b, u8& flags)
 {
 	u8 result = a + b;

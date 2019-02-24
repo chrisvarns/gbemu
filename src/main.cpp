@@ -1,7 +1,10 @@
-#include "math.h"
+#include "cpu.h"
 
 int main()
 {
-	Math::Example();
+	while (true)
+	{
+		CPU::step();
+	}
 	return 0;
 }
