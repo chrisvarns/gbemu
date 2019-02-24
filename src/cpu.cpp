@@ -192,16 +192,22 @@ void CPU::step()
 	// 1. LD n, nn
 	case Opcode::LD_BC_NN:
 	{
+		reg.BC = Memory::LoadU16(reg.PC);
+		reg.PC += 2;
 		assert(false && "Missing opcode");
 		break;
 	}
 	case Opcode::LD_DE_NN:
 	{
+		reg.DE = Memory::LoadU16(reg.PC);
+		reg.PC += 2;
 		assert(false && "Missing opcode");
 		break;
 	}
 	case Opcode::LD_HL_NN:
 	{
+		reg.HL = Memory::LoadU16(reg.PC);
+		reg.PC += 2;
 		assert(false && "Missing opcode");
 		break;
 	}
