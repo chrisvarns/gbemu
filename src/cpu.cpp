@@ -80,11 +80,17 @@ enum class Opcode : u8
 	// 3. LD A,n
 	LD_A_N = 0x3E,
 
+	// 4. LD n,A
+	LD_$HL_A = 0x77,
+
 	// 6. LD (C), A		Put A into address ($FF00 + register C)
 	LD_$FF00C_A = 0xE2,
 
 	// 10/11/12 Load A into HL and decrement HL
 	LD_$HLD_A = 0x32,
+
+	// 19 LDH (n),A
+	LD_$FF00N_A = 0xE0,
 
 	// 3.3.2 16-Bit Loads
 	// 1. LD n, nn
@@ -231,6 +237,12 @@ void CPU::step()
 		reg.PC++;
 		break;
 	}
+	// 4. LD n,A
+	case Opcode::LD_$HL_A:
+	{
+		Memory::StoreU8(reg.HL, reg.A);
+		break;
+	}
 	// 6. LD (C), A		Put A into address ($FF00 + register C)
 	case Opcode::LD_$FF00C_A:
 	{
@@ -243,6 +255,15 @@ void CPU::step()
 	{
 		Memory::StoreU8(reg.HL, reg.A);
 		reg.HL--;
+		break;
+	}
+	// 19 LDH (n),A
+	case Opcode::LD_$FF00N_A:
+	{
+		u8 n = Memory::LoadU8(reg.PC);
+		reg.PC++;
+		u16 addr = 0xFF00 + n;
+		Memory::StoreU8(addr, reg.A);
 		break;
 	}
 	// 3.3.2 16-Bit Loads
