@@ -77,6 +77,12 @@ enum class Opcode : u8
 	LD_$HL_L = 0x75,
 	LD_$HL_N = 0x36,
 
+	// 3. LD A,n
+	LD_A_N = 0x3E,
+
+	// 6. LD (C), A		Put A into address ($FF00 + register C)
+	LD_$FF00C_A = 0xE2,
+
 	// 10/11/12 Load A into HL and decrement HL
 	LD_$HLD_A = 0x32,
 
@@ -122,12 +128,6 @@ enum class Opcode : u8
 	PREFIX_DD = 0xDD,
 	PREFIX_ED = 0xED,
 	PREFIX_FD = 0xFD,
-};
-
-enum class Opcode_CB : u8
-{
-	// BIT
-	BIT_7_H = 0x7C,
 };
 
 void ProcessOpcodeCB();
@@ -214,6 +214,20 @@ void CPU::step()
 		reg.A = reg.L;
 		break;
 	}
+	// 3. LD A,n
+	case Opcode::LD_A_N:
+	{
+		reg.A = Memory::LoadU8(reg.PC);
+		reg.PC++;
+		break;
+	}
+	// 6. LD (C), A		Put A into address ($FF00 + register C)
+	case Opcode::LD_$FF00C_A:
+	{
+		u16 addr = 0xFF00 + reg.C;
+		Memory::StoreU8(addr, reg.A);
+		break;
+	}
 	// 10/11/12 Load A into HL and decrement HL
 	case Opcode::LD_$HLD_A:
 	{
@@ -287,6 +301,12 @@ void CPU::step()
 		break;
 	}
 }
+
+enum class Opcode_CB : u8
+{
+	// BIT
+	BIT_7_H = 0x7C,
+};
 
 void ProcessOpcodeCB()
 {
