@@ -16,10 +16,10 @@ namespace Math
 	u8 Sub(u8 val);
 	u16 Add(u16 a, u16 b);
 
-	u8 Inc(u8 a);
-	u8 Dec(u8 a);
-	u16 Inc(u16 a);
-	u16 Dec(u16 a);
+	void Inc(u8& a);
+	void Dec(u8& a);
+	void Inc(u16& a);
+	void Dec(u16& a);
 
 	u8 And(u8 a, u8 b);
 	u8 Or(u8 a, u8 b);

@@ -81,13 +81,13 @@ namespace Math
 		return result;
 	}
 
-	u8 Inc(u8 a)
+	void Inc(u8& a)
 	{
 		u8 result = a + 1;
 
 		bool z = result == 0;
 		bool n = false;
-		bool h = (a & (u8)0x0F) == (u8)0x0F;
+		bool h = (a & 0x0F) == 0x0F;
 		bool c = reg.F & (u8)Flags::C;
 
 		reg.F =
@@ -96,16 +96,16 @@ namespace Math
 			h ? (u8)Flags::H : 0 |
 			c ? (u8)Flags::C : 0;
 
-		return result;
+		a = result;
 	}
 
-	u8 Dec(u8 a)
+	void Dec(u8& a)
 	{
 		u8 result = a - 1;
 
 		bool z = result == 0;
 		bool n = true;
-		bool h = a & (u8)0x0F;
+		bool h = a & 0x0F;
 		bool c = reg.F & (u8)Flags::C;
 
 		reg.F =
@@ -114,23 +114,17 @@ namespace Math
 			h ? (u8)Flags::H : 0 |
 			c ? (u8)Flags::C : 0;
 
-		return result;
+		a = result;
 	}
 
-	u16 Inc(u16 a)
+	void Inc(u16& a)
 	{
-		u16 result = a;
-		++result;
-
-		return result;
+		a++;
 	}
 
-	u16 Dec(u16 a)
+	void Dec(u16& a)
 	{
-		u16 result = a;
-		--result;
-
-		return result;
+		a--;
 	}
 
 	u8 And(u8 a, u8 b)

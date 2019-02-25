@@ -116,6 +116,16 @@ enum class Opcode : u8
 	CP_$HL = 0xBE,
 	CP_N = 0xFE,
 
+	// 9. INC n
+	INC_A = 0x3C,
+	INC_B = 0x04,
+	INC_C = 0x0C,
+	INC_D = 0x14,
+	INC_E = 0x1C,
+	INC_H = 0x24,
+	INC_L = 0x2C,
+	INC_$HL = 0x34,
+
 	// 3.3.8 Jumps
 	// 5. JR cc,n
 	JR_NZ_N = 0x20,
@@ -274,6 +284,49 @@ void CPU::step()
 		u8 n = Memory::LoadU8(reg.PC);
 		reg.PC++;
 		Math::Compare(n);
+		break;
+	}
+	// 9. INC n
+	case Opcode::INC_A:
+	{
+		Math::Inc(reg.A);
+		break;
+	}
+	case Opcode::INC_B:
+	{
+		Math::Inc(reg.B);
+		break;
+	}
+	case Opcode::INC_C:
+	{
+		Math::Inc(reg.C);
+		break;
+	}
+	case Opcode::INC_D:
+	{
+		Math::Inc(reg.D);
+		break;
+	}
+	case Opcode::INC_E:
+	{
+		Math::Inc(reg.E);
+		break;
+	}
+	case Opcode::INC_H:
+	{
+		Math::Inc(reg.H);
+		break;
+	}
+	case Opcode::INC_L:
+	{
+		Math::Inc(reg.L);
+		break;
+	}
+	case Opcode::INC_$HL:
+	{
+		u8 value = Memory::LoadU8(reg.HL);
+		Math::Inc(value);
+		Memory::StoreU8(reg.HL, value);
 		break;
 	}
 	// 3.3.8 Jumps
