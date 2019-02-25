@@ -37,8 +37,8 @@ void Memory::StoreU8(u16 address, u8 val)
 void Memory::LoadBootRom()
 {
 	std::ifstream file;
-	file.open("assets\\DMG_ROM.bin");
+	file.open("assets\\DMG_ROM.bin", std::ifstream::binary);
 	assert(file);
-	file.read((char*)&memory[0], 256);
+	file.read((char*)memory, 256);
 	file.close();
 }
