@@ -214,7 +214,22 @@ enum class Opcode : u8
 	CP_$HL		= 0xBE,
 	CP_A		= 0xBF,
 
-	CALL_NN = 0xCD,
+	RET_NZ		= 0xC0,
+	POP_BC		= 0xC1,
+	JP_NZ_NN	= 0xC2,
+	JP_NN		= 0xC3,
+	CALL_NZ_NN	= 0xC4,
+	PUSH_BC		= 0xC5,
+	ADD_A_N		= 0xC6,
+	RST_00H		= 0xC7,
+	RET_Z		= 0xC8,
+	RET			= 0xC9,
+	JP_Z_NN		= 0xCA,
+	PREFIX_CB	= 0xCB,
+	CALL_Z_NN	= 0xCC,
+	CALL_NN		= 0xCD,
+	ADC_A_N		= 0xCE,
+	RST_08H		= 0xCF,
 
 	LD_$FF00N_A = 0xE0,
 	LD_$FF00C_A = 0xE2,
@@ -224,7 +239,6 @@ enum class Opcode : u8
 	CP_N = 0xFE,
 
 	// Prefix Bytes
-	PREFIX_CB = 0xCB,
 	PREFIX_DD = 0xDD,
 	PREFIX_ED = 0xED,
 	PREFIX_FD = 0xFD,
