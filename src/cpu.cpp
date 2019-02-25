@@ -196,7 +196,6 @@ enum class Opcode : u8
 	XOR_$HL		= 0xAE,
 	XOR_A		= 0xAF,
 
-	// 8. CP n (Compare)
 	OR_B		= 0xB0,
 	OR_C		= 0xB1,
 	OR_D		= 0xB2,
@@ -265,13 +264,22 @@ enum class Opcode : u8
 	XOR_N		= 0xEE,
 	RST_28H		= 0xEF,
 
-	LD_A_$NN = 0xFA,
-	CP_N = 0xFE,
-
-	// Prefix Bytes
-	PREFIX_DD = 0xDD,
-	PREFIX_ED = 0xED,
-	PREFIX_FD = 0xFD,
+	LDH_A_$N	= 0xF0,
+	POP_AF		= 0xF1,
+	LD_A_$C		= 0xF2,
+	DI			= 0xF3,
+	INVALID_F4	= 0xF4,
+	PUSH_AF		= 0xF5,
+	OR_N		= 0xF6,
+	RST_30H		= 0xF7,
+	LD_HL_SPN	= 0xF8,
+	LD_SP_HL	= 0xF9,
+	LD_A_$NN	= 0xFA,
+	EI			= 0xFB,
+	INVALID_FC	= 0xFC,
+	INVALID_FD	= 0xFD,
+	CP_N		= 0xFE,
+	RST_38H		= 0xFF,
 };
 
 void ProcessOpcodeCB();
