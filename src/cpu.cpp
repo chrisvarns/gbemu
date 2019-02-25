@@ -9,16 +9,48 @@ Registers reg;
 
 enum class Opcode : u8
 {
-	// 3.3.1 8-bit loads
-	// 1. LD r1,val (r1 = 8 bit immediate value)
+	NOP = 0x00,
+	LD_BC_NN = 0x01,
+	LD_$BC_A = 0x02,
+	INC_BC = 0x03,
+	INC_B = 0x04,
+	DEC_B = 0x05,
 	LD_B_N = 0x06,
+	RLCA = 0x07,
+	LD_$NN_SP = 0x08,
+	ADD_HL_BC = 0x09,
+	LD_A_$BC = 0x0A,
+	DEC_BC = 0x0B,
+	INC_C = 0x0C,
+	DEC_C = 0x0D,
 	LD_C_N = 0x0E,
+	RRCA = 0x0F,
+
+	STOP_0 = 0x10,
+	LD_DE_NN = 0x11,
+	INC_D = 0x14,
 	LD_D_N = 0x16,
+	LD_A_$DE = 0x1A,
+	INC_E = 0x1C,
 	LD_E_N = 0x1E,
+
+	JR_NZ_N = 0x20,
+	LD_HL_NN = 0x21,
+	INC_H = 0x24,
 	LD_H_N = 0x26,
+	JR_Z_N = 0x28,
+	INC_L = 0x2C,
 	LD_L_N = 0x2E,
 
-	// 2. LD r1,r2 (r1 = r2)
+	JR_NC_N = 0x30,
+	LD_SP_NN = 0x31,
+	LD_$HLD_A = 0x32,
+	INC_$HL = 0x34,
+	LD_$HL_N = 0x36,
+	JR_C_N = 0x38,
+	INC_A = 0x3C,
+	LD_A_N = 0x3E,
+
 	LD_B_B = 0x40,
 	LD_B_C = 0x41,
 	LD_B_D = 0x42,
@@ -33,6 +65,7 @@ enum class Opcode : u8
 	LD_C_H = 0x4C,
 	LD_C_L = 0x4D,
 	LD_C_$HL = 0x4E,
+
 	LD_D_B = 0x50,
 	LD_D_C = 0x51,
 	LD_D_D = 0x52,
@@ -47,6 +80,7 @@ enum class Opcode : u8
 	LD_E_H = 0x5C,
 	LD_E_L = 0x5D,
 	LD_E_$HL = 0x5E,
+
 	LD_H_B = 0x60,
 	LD_H_C = 0x61,
 	LD_H_D = 0x62,
@@ -61,49 +95,23 @@ enum class Opcode : u8
 	LD_L_H = 0x6C,
 	LD_L_L = 0x6D,
 	LD_L_$HL = 0x6E,
+
 	LD_$HL_B = 0x70,
 	LD_$HL_C = 0x71,
 	LD_$HL_D = 0x72,
 	LD_$HL_E = 0x73,
 	LD_$HL_H = 0x74,
 	LD_$HL_L = 0x75,
-	LD_$HL_N = 0x36,
-
-	// 3. LD A,n
-	LD_A_A = 0x7F,
+	LD_$HL_A = 0x77,
 	LD_A_B = 0x78,
 	LD_A_C = 0x79,
 	LD_A_D = 0x7A,
 	LD_A_E = 0x7B,
 	LD_A_H = 0x7C,
 	LD_A_L = 0x7D,
-	LD_A_$BC = 0x0A,
-	LD_A_$DE = 0x1A,
 	LD_A_$HL = 0x7E,
-	LD_A_$NN = 0xFA,
-	LD_A_N = 0x3E,
+	LD_A_A = 0x7F,
 
-	// 4. LD n,A
-	LD_$HL_A = 0x77,
-
-	// 6. LD (C), A		Put A into address ($FF00 + register C)
-	LD_$FF00C_A = 0xE2,
-
-	// 10/11/12 Load A into HL and decrement HL
-	LD_$HLD_A = 0x32,
-
-	// 19 LDH (n),A
-	LD_$FF00N_A = 0xE0,
-
-	// 3.3.2 16-Bit Loads
-	// 1. LD n, nn
-	LD_BC_NN = 0x01,
-	LD_DE_NN = 0x11,
-	LD_HL_NN = 0x21,
-	LD_SP_NN = 0x31,
-
-	// 3.3.3 8-bit ALU
-	// 7. XOR n
 	XOR_A = 0xAF,
 	XOR_B = 0xA8,
 	XOR_C = 0xA9,
@@ -123,28 +131,14 @@ enum class Opcode : u8
 	CP_H = 0xBC,
 	CP_L = 0xBD,
 	CP_$HL = 0xBE,
-	CP_N = 0xFE,
 
-	// 9. INC n
-	INC_A = 0x3C,
-	INC_B = 0x04,
-	INC_C = 0x0C,
-	INC_D = 0x14,
-	INC_E = 0x1C,
-	INC_H = 0x24,
-	INC_L = 0x2C,
-	INC_$HL = 0x34,
-
-	// 3.3.8 Jumps
-	// 5. JR cc,n
-	JR_NZ_N = 0x20,
-	JR_Z_N = 0x28,
-	JR_NC_N = 0x30,
-	JR_C_N = 0x38,
-
-	// 3.3.9 Calls
-	// 1. CALL nn
 	CALL_NN = 0xCD,
+
+	LD_$FF00N_A = 0xE0,
+	LD_$FF00C_A = 0xE2,
+
+	LD_A_$NN = 0xFA,
+	CP_N = 0xFE,
 
 	// Prefix Bytes
 	PREFIX_CB = 0xCB,
