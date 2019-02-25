@@ -34,6 +34,14 @@ void Memory::StoreU8(u16 address, u8 val)
 	memory[address] = val;
 }
 
+void Memory::StoreU16(u16 address, u16 val)
+{
+	u8 lsb = u8(val & 0xFF);
+	u8 msb = u8(val >> 8);
+	memory[address] = lsb;
+	memory[address + 1] = msb;
+}
+
 void Memory::LoadBootRom()
 {
 	std::ifstream file;

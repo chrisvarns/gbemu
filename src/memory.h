@@ -9,6 +9,7 @@ namespace Memory
 	s16 LoadS16(u16 address);
 
 	void StoreU8(u16 address, u8 val);
+	void StoreU16(u16 address, u16 val);
 
 	void LoadBootRom();
 };

@@ -19,14 +19,6 @@ enum class Opcode : u8
 	LD_L_N = 0x2E,
 
 	// 2. LD r1,r2 (r1 = r2)
-	LD_A_A = 0x7F,
-	LD_A_B = 0x78,
-	LD_A_C = 0x79,
-	LD_A_D = 0x7A,
-	LD_A_E = 0x7B,
-	LD_A_H = 0x7C,
-	LD_A_L = 0x7D,
-	LD_A_$HL = 0x7E,
 	LD_B_B = 0x40,
 	LD_B_C = 0x41,
 	LD_B_D = 0x42,
@@ -78,6 +70,17 @@ enum class Opcode : u8
 	LD_$HL_N = 0x36,
 
 	// 3. LD A,n
+	LD_A_A = 0x7F,
+	LD_A_B = 0x78,
+	LD_A_C = 0x79,
+	LD_A_D = 0x7A,
+	LD_A_E = 0x7B,
+	LD_A_H = 0x7C,
+	LD_A_L = 0x7D,
+	LD_A_$BC = 0x0A,
+	LD_A_$DE = 0x1A,
+	LD_A_$HL = 0x7E,
+	LD_A_$NN = 0xFA,
 	LD_A_N = 0x3E,
 
 	// 4. LD n,A
@@ -139,6 +142,10 @@ enum class Opcode : u8
 	JR_NC_N = 0x30,
 	JR_C_N = 0x38,
 
+	// 3.3.9 Calls
+	// 1. CALL nn
+	CALL_NN = 0xCD,
+
 	// Prefix Bytes
 	PREFIX_CB = 0xCB,
 	PREFIX_DD = 0xDD,
@@ -195,6 +202,8 @@ void CPU::step()
 		break;
 	}
 	// 2. LD r1,r2 (r1 = r2)
+	
+	// 3. LD A,n
 	case Opcode::LD_A_A:
 	{
 		reg.A = reg.A;
@@ -230,7 +239,28 @@ void CPU::step()
 		reg.A = reg.L;
 		break;
 	}
-	// 3. LD A,n
+	case Opcode::LD_A_$BC:
+	{
+		reg.A = Memory::LoadU8(reg.BC);
+		break;
+	}
+	case Opcode::LD_A_$DE:
+	{
+		reg.A = Memory::LoadU8(reg.DE);
+		break;
+	}
+	case Opcode::LD_A_$HL:
+	{
+		reg.A = Memory::LoadU8(reg.HL);
+		break;
+	}
+	case Opcode::LD_A_$NN:
+	{
+		u16 addr = Memory::LoadU16(reg.PC);
+		reg.PC += 2;
+		reg.A = Memory::LoadU8(addr);
+		break;
+	}
 	case Opcode::LD_A_N:
 	{
 		reg.A = Memory::LoadU8(reg.PC);
@@ -360,6 +390,17 @@ void CPU::step()
 		{
 			reg.PC += n;
 		}
+		break;
+	}
+	// 3.3.9 Calls
+	// 1. CALL nn
+	case Opcode::CALL_NN:
+	{
+		u16 addr = Memory::LoadU16(reg.PC); // Grab immediate value
+		reg.PC += 2;
+		Memory::StoreU16(reg.SP, reg.PC); // Store PC on stack
+		reg.SP -= 2;
+		reg.PC = addr; // "Call"
 		break;
 	}
 	case Opcode::PREFIX_CB:
