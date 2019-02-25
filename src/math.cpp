@@ -6,7 +6,7 @@
 namespace Math
 {
 
-	u8 Math::Add(u8 a, u8 b)
+	u8 Add(u8 a, u8 b)
 	{
 		u8 result = a + b;
 
@@ -24,7 +24,7 @@ namespace Math
 		return result;
 	}
 
-	u8 Math::AddWithCarry(u8 a, u8 b)
+	u8 AddWithCarry(u8 a, u8 b)
 	{
 		u8 carry = reg.F & (u8)Flags::C;
 		a = reg.F & (u8)Flags::C ? a + 1 : a;
