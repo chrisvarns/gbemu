@@ -292,10 +292,38 @@ void CPU::step()
 
 	switch (opcode)
 	{
+	// 0x00
+	{
+	case Opcode::NOP:
+	{
+		// Do nothing
+		break;
+	}
+	case Opcode::LD_BC_NN:
+	{
+		reg.BC = Memory::LoadU16(reg.PC);
+		reg.PC += 2;
+		break;
+	}
+	case Opcode::INC_B:
+	{
+		Math::Inc(reg.B);
+		break;
+	}
 	case Opcode::LD_B_N:
 	{
 		reg.B = Memory::LoadU8(reg.PC);
 		reg.PC++;
+		break;
+	}
+	case Opcode::LD_A_$BC:
+	{
+		reg.A = Memory::LoadU8(reg.BC);
+		break;
+	}
+	case Opcode::INC_C:
+	{
+		Math::Inc(reg.C);
 		break;
 	}
 	case Opcode::LD_C_N:
@@ -304,10 +332,34 @@ void CPU::step()
 		reg.PC++;
 		break;
 	}
+	}
+	// 0x10
+	{
+	case Opcode::LD_DE_NN:
+	{
+		reg.DE = Memory::LoadU16(reg.PC);
+		reg.PC += 2;
+		break;
+	}
+	case Opcode::INC_D:
+	{
+		Math::Inc(reg.D);
+		break;
+	}
 	case Opcode::LD_D_N:
 	{
 		reg.D = Memory::LoadU8(reg.PC);
 		reg.PC++;
+		break;
+	}
+	case Opcode::LD_A_$DE:
+	{
+		reg.A = Memory::LoadU8(reg.DE);
+		break;
+	}
+	case Opcode::INC_E:
+	{
+		Math::Inc(reg.E);
 		break;
 	}
 	case Opcode::LD_E_N:
@@ -316,10 +368,39 @@ void CPU::step()
 		reg.PC++;
 		break;
 	}
+	}
+	// 0x20
+	{
+	case Opcode::JR_NZ_N:
+	{
+		s8 n = Memory::LoadS8(reg.PC);
+		reg.PC++; // The immediate value is part of the instruction
+		if (!(reg.F & (u8)Flags::Z))
+		{
+			reg.PC += n;
+		}
+		break;
+	}
+	case Opcode::LD_HL_NN:
+	{
+		reg.HL = Memory::LoadU16(reg.PC);
+		reg.PC += 2;
+		break;
+	}
+	case Opcode::INC_H:
+	{
+		Math::Inc(reg.H);
+		break;
+	}
 	case Opcode::LD_H_N:
 	{
 		reg.H = Memory::LoadU8(reg.PC);
 		reg.PC++;
+		break;
+	}
+	case Opcode::INC_L:
+	{
+		Math::Inc(reg.L);
 		break;
 	}
 	case Opcode::LD_L_N:
@@ -328,9 +409,59 @@ void CPU::step()
 		reg.PC++;
 		break;
 	}
-	case Opcode::LD_A_A:
+	}
+	// 0x30
 	{
-		reg.A = reg.A;
+	case Opcode::LD_SP_NN:
+	{
+		reg.SP = Memory::LoadU16(reg.PC);
+		reg.PC += 2;
+		break;
+	}
+	case Opcode::LD_$HLD_A:
+	{
+		Memory::StoreU8(reg.HL, reg.A);
+		reg.HL--;
+		break;
+	}
+	case Opcode::INC_$HL:
+	{
+		u8 value = Memory::LoadU8(reg.HL);
+		Math::Inc(value);
+		Memory::StoreU8(reg.HL, value);
+		break;
+	}
+	case Opcode::INC_A:
+	{
+		Math::Inc(reg.A);
+		break;
+	}
+	case Opcode::LD_A_N:
+	{
+		reg.A = Memory::LoadU8(reg.PC);
+		reg.PC++;
+		break;
+	}
+	}
+	// 0x40
+	{
+	case Opcode::LD_C_A:
+	{
+		reg.C = reg.A;
+		break;
+	}
+	}
+	// 0x50
+	{
+	}
+	// 0x60
+	{
+	}
+	// 0x70
+	{
+	case Opcode::LD_$HL_A:
+	{
+		Memory::StoreU8(reg.HL, reg.A);
 		break;
 	}
 	case Opcode::LD_A_B:
@@ -363,161 +494,41 @@ void CPU::step()
 		reg.A = reg.L;
 		break;
 	}
-	case Opcode::LD_A_$BC:
-	{
-		reg.A = Memory::LoadU8(reg.BC);
-		break;
-	}
-	case Opcode::LD_A_$DE:
-	{
-		reg.A = Memory::LoadU8(reg.DE);
-		break;
-	}
 	case Opcode::LD_A_$HL:
 	{
 		reg.A = Memory::LoadU8(reg.HL);
 		break;
 	}
-	case Opcode::LD_A_$NN:
+	case Opcode::LD_A_A:
 	{
-		u16 addr = Memory::LoadU16(reg.PC);
-		reg.PC += 2;
-		reg.A = Memory::LoadU8(addr);
+		reg.A = reg.A;
 		break;
 	}
-	case Opcode::LD_A_N:
-	{
-		reg.A = Memory::LoadU8(reg.PC);
-		reg.PC++;
-		break;
 	}
-	// 4. LD n,A
-	case Opcode::LD_$HL_A:
+	// 0x80
 	{
-		Memory::StoreU8(reg.HL, reg.A);
-		break;
 	}
-	// 6. LD (C), A		Put A into address ($FF00 + register C)
-	case Opcode::LD_$C_A:
+	// 0x90
 	{
-		u16 addr = 0xFF00 + reg.C;
-		Memory::StoreU8(addr, reg.A);
-		break;
 	}
-	// 10/11/12 Load A into HL and decrement HL
-	case Opcode::LD_$HLD_A:
+	// 0xA0
 	{
-		Memory::StoreU8(reg.HL, reg.A);
-		reg.HL--;
-		break;
-	}
-	// 19 LDH (n),A
-	case Opcode::LDH_$N_A:
-	{
-		u8 n = Memory::LoadU8(reg.PC);
-		reg.PC++;
-		u16 addr = 0xFF00 + n;
-		Memory::StoreU8(addr, reg.A);
-		break;
-	}
-	// 3.3.2 16-Bit Loads
-	// 1. LD n, nn
-	case Opcode::LD_BC_NN:
-	{
-		reg.BC = Memory::LoadU16(reg.PC);
-		reg.PC += 2;
-		break;
-	}
-	case Opcode::LD_DE_NN:
-	{
-		reg.DE = Memory::LoadU16(reg.PC);
-		reg.PC += 2;
-		break;
-	}
-	case Opcode::LD_HL_NN:
-	{
-		reg.HL = Memory::LoadU16(reg.PC);
-		reg.PC += 2;
-		break;
-	}
-	case Opcode::LD_SP_NN:
-	{
-		reg.SP = Memory::LoadU16(reg.PC);
-		reg.PC += 2;
-		break;
-	}
-	// 3.3.3 8-bit ALU
-	// 7. XOR n
 	case Opcode::XOR_A:
 	{
 		Math::Xor(reg.A);
 		break;
 	}
-	// 8. CP n (Compare)
-	case Opcode::CP_N:
+	}
+	// 0xB0
 	{
-		u8 n = Memory::LoadU8(reg.PC);
-		reg.PC++;
-		Math::Compare(n);
+	}
+	// 0xC0
+	{
+	case Opcode::PREFIX_CB:
+	{
+		ProcessOpcodeCB();
 		break;
 	}
-	// 9. INC n
-	case Opcode::INC_A:
-	{
-		Math::Inc(reg.A);
-		break;
-	}
-	case Opcode::INC_B:
-	{
-		Math::Inc(reg.B);
-		break;
-	}
-	case Opcode::INC_C:
-	{
-		Math::Inc(reg.C);
-		break;
-	}
-	case Opcode::INC_D:
-	{
-		Math::Inc(reg.D);
-		break;
-	}
-	case Opcode::INC_E:
-	{
-		Math::Inc(reg.E);
-		break;
-	}
-	case Opcode::INC_H:
-	{
-		Math::Inc(reg.H);
-		break;
-	}
-	case Opcode::INC_L:
-	{
-		Math::Inc(reg.L);
-		break;
-	}
-	case Opcode::INC_$HL:
-	{
-		u8 value = Memory::LoadU8(reg.HL);
-		Math::Inc(value);
-		Memory::StoreU8(reg.HL, value);
-		break;
-	}
-	// 3.3.8 Jumps
-	// 5. JR cc,n
-	case Opcode::JR_NZ_N:
-	{
-		s8 n = Memory::LoadS8(reg.PC);
-		reg.PC++; // The immediate value is part of the instruction
-		if (!(reg.F & (u8)Flags::Z))
-		{
-			reg.PC += n;
-		}
-		break;
-	}
-	// 3.3.9 Calls
-	// 1. CALL nn
 	case Opcode::CALL_NN:
 	{
 		u16 addr = Memory::LoadU16(reg.PC); // Grab immediate value
@@ -527,10 +538,43 @@ void CPU::step()
 		reg.PC = addr; // "Call"
 		break;
 	}
-	case Opcode::PREFIX_CB:
+	}
+	// 0xD0
 	{
-		ProcessOpcodeCB();
+	}
+	// 0xE0
+	{
+	case Opcode::LDH_$N_A:
+	{
+		u8 n = Memory::LoadU8(reg.PC);
+		reg.PC++;
+		u16 addr = 0xFF00 + n;
+		Memory::StoreU8(addr, reg.A);
 		break;
+	}
+	case Opcode::LD_$C_A:
+	{
+		u16 addr = 0xFF00 + reg.C;
+		Memory::StoreU8(addr, reg.A);
+		break;
+	}
+	}
+	// 0xF0
+	{
+	case Opcode::LD_A_$NN:
+	{
+		u16 addr = Memory::LoadU16(reg.PC);
+		reg.PC += 2;
+		reg.A = Memory::LoadU8(addr);
+		break;
+	}
+	case Opcode::CP_N:
+	{
+		u8 n = Memory::LoadU8(reg.PC);
+		reg.PC++;
+		Math::Compare(n);
+		break;
+	}
 	}
 	default:
 		assert(false && "Unknown opcode");
