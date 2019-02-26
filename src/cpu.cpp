@@ -352,6 +352,11 @@ void CPU::step()
 		reg.PC++;
 		break;
 	}
+	case Opcode::RLA:
+	{
+		Math::RotateLeft(reg.A);
+		break;
+	}
 	case Opcode::LD_A_$DE:
 	{
 		reg.A = Memory::LoadU8(reg.DE);
