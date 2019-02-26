@@ -310,6 +310,11 @@ void CPU::step()
 		Math::Inc(reg.B);
 		break;
 	}
+	case Opcode::DEC_B:
+	{
+		Math::Dec(reg.B);
+		break;
+	}
 	case Opcode::LD_B_N:
 	{
 		reg.B = Memory::LoadU8(reg.PC);
