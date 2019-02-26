@@ -212,4 +212,24 @@ namespace Math
 			h ? (u8)Flags::H : 0 |
 			c ? (u8)Flags::C : 0;
 	}
+
+	void RotateLeft(u8& val)
+	{
+		u8 result = val << 1;
+		result &= (reg.F & (u8)Flags::C) ? 0x1 : 0x0;
+
+		bool z = !result;
+		bool n = false;
+		bool h = false;
+		bool c = val >> 7;
+
+		reg.F =
+			z ? (u8)Flags::Z : 0 |
+			n ? (u8)Flags::N : 0 |
+			h ? (u8)Flags::H : 0 |
+			c ? (u8)Flags::C : 0;
+
+		val = result;
+	}
+		
 }

@@ -524,6 +524,12 @@ void CPU::step()
 	}
 	// 0xC0
 	{
+	case Opcode::PUSH_BC:
+	{
+		Memory::StoreU16(reg.SP, reg.BC);
+		reg.SP -= 2;
+		break;
+	}
 	case Opcode::PREFIX_CB:
 	{
 		ProcessOpcodeCB();
@@ -863,10 +869,100 @@ void ProcessOpcodeCB()
 	reg.PC++;
 	switch (opcode_cb)
 	{
+	// 0x00
+	{
+	}
+	// 0x10
+	{
+	case Opcode_CB::RL_B:
+	{
+		Math::RotateLeft(reg.B);
+		break;
+	}
+	case Opcode_CB::RL_C:
+	{
+		Math::RotateLeft(reg.C);
+		break;
+	}
+	case Opcode_CB::RL_D:
+	{
+		Math::RotateLeft(reg.D);
+		break;
+	}
+	case Opcode_CB::RL_E:
+	{
+		Math::RotateLeft(reg.E);
+		break;
+	}
+	case Opcode_CB::RL_H:
+	{
+		Math::RotateLeft(reg.H);
+		break;
+	}
+	case Opcode_CB::RL_L:
+	{
+		Math::RotateLeft(reg.L);
+		break;
+	}
+	case Opcode_CB::RL_$HL:
+	{
+		u8 val = Memory::LoadU8(reg.HL);
+		Math::RotateLeft(val);
+		Memory::StoreU8(reg.HL, val);
+		break;
+	}
+	case Opcode_CB::RL_A:
+	{
+		Math::RotateLeft(reg.A);
+		break;
+	}
+	}
+	// 0x20
+	{
+	}
+	// 0x30
+	{
+	}
+	// 0x40
+	{
+	}
+	// 0x50
+	{
+	}
+	// 0x60
+	{
+	}
+	// 0x70
+	{
 	case Opcode_CB::BIT_7_H:
 	{
 		Math::Bit(reg.H, 7);
 		break;
+	}
+	}
+	// 0x80
+	{
+	}
+	// 0x90
+	{
+	}
+	// 0xA0
+	{
+	}
+	// 0xB0
+	{
+	}
+	// 0xC0
+	{
+	}
+	// 0xD0
+	{
+	}
+	// 0xE0
+	{
+	}
+	// 0xF0
+	{
 	}
 	default:
 		assert(false && "Unknown opcode");
