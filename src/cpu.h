@@ -7,8 +7,8 @@ struct Registers
 	{
 		struct
 		{
-			u8 A;
 			u8 F; // Flag register
+			u8 A;
 		};
 		u16 AF;
 	};
@@ -17,8 +17,8 @@ struct Registers
 	{
 		struct
 		{
-			u8 B;
 			u8 C;
+			u8 B;
 		};
 		u16 BC;
 	};
@@ -27,8 +27,8 @@ struct Registers
 	{
 		struct
 		{
-			u8 D;
 			u8 E;
+			u8 D;
 		};
 		u16 DE;
 	};
@@ -37,8 +37,8 @@ struct Registers
 	{
 		struct
 		{
-			u8 H;
 			u8 L;
+			u8 H;
 		};
 		u16 HL;
 	};
