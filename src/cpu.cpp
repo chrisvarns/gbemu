@@ -292,8 +292,6 @@ void CPU::step()
 
 	switch (opcode)
 	{
-	// 3.3.1 8-bit loads
-	// 1. LD r1,val (r1 = 8 bit immediate value)
 	case Opcode::LD_B_N:
 	{
 		reg.B = Memory::LoadU8(reg.PC);
@@ -330,9 +328,6 @@ void CPU::step()
 		reg.PC++;
 		break;
 	}
-	// 2. LD r1,r2 (r1 = r2)
-	
-	// 3. LD A,n
 	case Opcode::LD_A_A:
 	{
 		reg.A = reg.A;
@@ -403,7 +398,7 @@ void CPU::step()
 		break;
 	}
 	// 6. LD (C), A		Put A into address ($FF00 + register C)
-	case Opcode::LD_$FF00C_A:
+	case Opcode::LD_$C_A:
 	{
 		u16 addr = 0xFF00 + reg.C;
 		Memory::StoreU8(addr, reg.A);
@@ -417,7 +412,7 @@ void CPU::step()
 		break;
 	}
 	// 19 LDH (n),A
-	case Opcode::LD_$FF00N_A:
+	case Opcode::LDH_$N_A:
 	{
 		u8 n = Memory::LoadU8(reg.PC);
 		reg.PC++;
@@ -533,9 +528,6 @@ void CPU::step()
 		break;
 	}
 	case Opcode::PREFIX_CB:
-	case Opcode::PREFIX_DD:
-	case Opcode::PREFIX_ED:
-	case Opcode::PREFIX_FD:
 	{
 		ProcessOpcodeCB();
 		break;
