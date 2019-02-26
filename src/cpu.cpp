@@ -2,7 +2,7 @@
 
 #include "cpu.h"
 #include "math.h"
-#include "memory.h"
+#include "Bus.h"
 #include "types.h"
 
 Registers reg;
@@ -286,8 +286,8 @@ void ProcessOpcodeCB();
 
 void CPU::step()
 {
-	// Get opcode from memory
-	Opcode opcode = (Opcode)Memory::LoadU8(reg.PC);
+	// Get opcode from Bus
+	Opcode opcode = (Opcode)Bus::LoadU8(reg.PC);
 	reg.PC++;
 
 	switch (opcode)
@@ -301,8 +301,8 @@ void CPU::step()
 	}
 	case Opcode::LD_BC_NN:
 	{
-		reg.BC = Memory::LoadU16(reg.PC);
-		reg.PC += 2;
+		reg.C = Bus::LoadU8(reg.PC++);
+		reg.B = Bus::LoadU8(reg.PC++);
 		break;
 	}
 	case Opcode::INC_B:
@@ -317,13 +317,13 @@ void CPU::step()
 	}
 	case Opcode::LD_B_N:
 	{
-		reg.B = Memory::LoadU8(reg.PC);
+		reg.B = Bus::LoadU8(reg.PC);
 		reg.PC++;
 		break;
 	}
 	case Opcode::LD_A_$BC:
 	{
-		reg.A = Memory::LoadU8(reg.BC);
+		reg.A = Bus::LoadU8(reg.BC);
 		break;
 	}
 	case Opcode::INC_C:
@@ -333,7 +333,7 @@ void CPU::step()
 	}
 	case Opcode::LD_C_N:
 	{
-		reg.C = Memory::LoadU8(reg.PC);
+		reg.C = Bus::LoadU8(reg.PC);
 		reg.PC++;
 		break;
 	}
@@ -342,8 +342,8 @@ void CPU::step()
 	{
 	case Opcode::LD_DE_NN:
 	{
-		reg.DE = Memory::LoadU16(reg.PC);
-		reg.PC += 2;
+		reg.E = Bus::LoadU8(reg.PC++);
+		reg.D = Bus::LoadU8(reg.PC++);
 		break;
 	}
 	case Opcode::INC_D:
@@ -353,7 +353,7 @@ void CPU::step()
 	}
 	case Opcode::LD_D_N:
 	{
-		reg.D = Memory::LoadU8(reg.PC);
+		reg.D = Bus::LoadU8(reg.PC);
 		reg.PC++;
 		break;
 	}
@@ -364,7 +364,7 @@ void CPU::step()
 	}
 	case Opcode::LD_A_$DE:
 	{
-		reg.A = Memory::LoadU8(reg.DE);
+		reg.A = Bus::LoadU8(reg.DE);
 		break;
 	}
 	case Opcode::INC_E:
@@ -374,7 +374,7 @@ void CPU::step()
 	}
 	case Opcode::LD_E_N:
 	{
-		reg.E = Memory::LoadU8(reg.PC);
+		reg.E = Bus::LoadU8(reg.PC);
 		reg.PC++;
 		break;
 	}
@@ -383,7 +383,7 @@ void CPU::step()
 	{
 	case Opcode::JR_NZ_N:
 	{
-		s8 n = Memory::LoadS8(reg.PC);
+		s8 n = s8(Bus::LoadU8(reg.PC));
 		reg.PC++; // The immediate value is part of the instruction
 		if (!(reg.F & (u8)Flags::Z))
 		{
@@ -393,8 +393,8 @@ void CPU::step()
 	}
 	case Opcode::LD_HL_NN:
 	{
-		reg.HL = Memory::LoadU16(reg.PC);
-		reg.PC += 2;
+		reg.L = Bus::LoadU8(reg.PC++);
+		reg.H = Bus::LoadU8(reg.PC++);
 		break;
 	}
 	case Opcode::INC_H:
@@ -404,7 +404,7 @@ void CPU::step()
 	}
 	case Opcode::LD_H_N:
 	{
-		reg.H = Memory::LoadU8(reg.PC);
+		reg.H = Bus::LoadU8(reg.PC);
 		reg.PC++;
 		break;
 	}
@@ -415,7 +415,7 @@ void CPU::step()
 	}
 	case Opcode::LD_L_N:
 	{
-		reg.L = Memory::LoadU8(reg.PC);
+		reg.L = Bus::LoadU8(reg.PC);
 		reg.PC++;
 		break;
 	}
@@ -424,21 +424,21 @@ void CPU::step()
 	{
 	case Opcode::LD_SP_NN:
 	{
-		reg.SP = Memory::LoadU16(reg.PC);
-		reg.PC += 2;
+		reg.SP_P = Bus::LoadU8(reg.PC++);
+		reg.SP_S = Bus::LoadU8(reg.PC++);
 		break;
 	}
 	case Opcode::LD_$HLD_A:
 	{
-		Memory::StoreU8(reg.HL, reg.A);
+		Bus::StoreU8(reg.HL, reg.A);
 		reg.HL--;
 		break;
 	}
 	case Opcode::INC_$HL:
 	{
-		u8 value = Memory::LoadU8(reg.HL);
+		u8 value = Bus::LoadU8(reg.HL);
 		Math::Inc(value);
-		Memory::StoreU8(reg.HL, value);
+		Bus::StoreU8(reg.HL, value);
 		break;
 	}
 	case Opcode::INC_A:
@@ -448,7 +448,7 @@ void CPU::step()
 	}
 	case Opcode::LD_A_N:
 	{
-		reg.A = Memory::LoadU8(reg.PC);
+		reg.A = Bus::LoadU8(reg.PC);
 		reg.PC++;
 		break;
 	}
@@ -471,7 +471,7 @@ void CPU::step()
 	{
 	case Opcode::LD_$HL_A:
 	{
-		Memory::StoreU8(reg.HL, reg.A);
+		Bus::StoreU8(reg.HL, reg.A);
 		break;
 	}
 	case Opcode::LD_A_B:
@@ -506,7 +506,7 @@ void CPU::step()
 	}
 	case Opcode::LD_A_$HL:
 	{
-		reg.A = Memory::LoadU8(reg.HL);
+		reg.A = Bus::LoadU8(reg.HL);
 		break;
 	}
 	case Opcode::LD_A_A:
@@ -536,14 +536,14 @@ void CPU::step()
 	{
 	case Opcode::POP_BC:
 	{
-		reg.BC = Memory::LoadU16(reg.SP);
-		reg.SP += 2;
+		reg.C = Bus::LoadU8(reg.SP++);
+		reg.B = Bus::LoadU8(reg.SP++);
 		break;
 	}
 	case Opcode::PUSH_BC:
 	{
-		Memory::StoreU16(reg.SP, reg.BC);
-		reg.SP -= 2;
+		Bus::StoreU8(--reg.SP, reg.B);
+		Bus::StoreU8(--reg.SP, reg.C);
 		break;
 	}
 	case Opcode::PREFIX_CB:
@@ -553,11 +553,12 @@ void CPU::step()
 	}
 	case Opcode::CALL_NN:
 	{
-		u16 addr = Memory::LoadU16(reg.PC); // Grab immediate value
-		reg.PC += 2;
-		Memory::StoreU16(reg.SP, reg.PC); // Store PC on stack
-		reg.SP -= 2;
-		reg.PC = addr; // "Call"
+		u16split val;
+		val.H = Bus::LoadU8(reg.PC++);
+		val.L = Bus::LoadU8(reg.PC++);
+		Bus::StoreU8(--reg.SP, reg.PC_P);
+		Bus::StoreU8(--reg.SP, reg.PC_C);
+		reg.PC = val.Full;
 		break;
 	}
 	}
@@ -568,16 +569,16 @@ void CPU::step()
 	{
 	case Opcode::LDH_$N_A:
 	{
-		u8 n = Memory::LoadU8(reg.PC);
+		u8 n = Bus::LoadU8(reg.PC);
 		reg.PC++;
 		u16 addr = 0xFF00 + n;
-		Memory::StoreU8(addr, reg.A);
+		Bus::StoreU8(addr, reg.A);
 		break;
 	}
 	case Opcode::LD_$C_A:
 	{
 		u16 addr = 0xFF00 + reg.C;
-		Memory::StoreU8(addr, reg.A);
+		Bus::StoreU8(addr, reg.A);
 		break;
 	}
 	}
@@ -585,14 +586,15 @@ void CPU::step()
 	{
 	case Opcode::LD_A_$NN:
 	{
-		u16 addr = Memory::LoadU16(reg.PC);
-		reg.PC += 2;
-		reg.A = Memory::LoadU8(addr);
+		u16split val;
+		val.H = Bus::LoadU8(reg.PC++);
+		val.L = Bus::LoadU8(reg.PC++);
+		reg.A = Bus::LoadU8(val.Full);
 		break;
 	}
 	case Opcode::CP_N:
 	{
-		u8 n = Memory::LoadU8(reg.PC);
+		u8 n = Bus::LoadU8(reg.PC);
 		reg.PC++;
 		Math::Compare(n);
 		break;
@@ -881,7 +883,7 @@ enum class Opcode_CB : u8
 
 void ProcessOpcodeCB()
 {
-	Opcode_CB opcode_cb = (Opcode_CB)Memory::LoadU8(reg.PC);
+	Opcode_CB opcode_cb = (Opcode_CB)Bus::LoadU8(reg.PC);
 	reg.PC++;
 	switch (opcode_cb)
 	{
@@ -922,9 +924,9 @@ void ProcessOpcodeCB()
 	}
 	case Opcode_CB::RL_$HL:
 	{
-		u8 val = Memory::LoadU8(reg.HL);
+		u8 val = Bus::LoadU8(reg.HL);
 		Math::RotateLeft(val);
-		Memory::StoreU8(reg.HL, val);
+		Bus::StoreU8(reg.HL, val);
 		break;
 	}
 	case Opcode_CB::RL_A:

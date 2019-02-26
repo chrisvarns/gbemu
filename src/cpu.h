@@ -43,8 +43,25 @@ struct Registers
 		u16 HL;
 	};
 
-	u16 SP;
-	u16 PC = 0x00;
+	union
+	{
+		struct
+		{
+			u8 SP_P;
+			u8 SP_S;
+		};
+		u16 SP;
+	};
+
+	union
+	{
+		struct
+		{
+			u8 PC_C;
+			u8 PC_P;
+		};
+		u16 PC = 0x00;
+	};
 };
 
 extern Registers reg;

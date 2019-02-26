@@ -7,3 +7,15 @@ typedef uint32_t u32;
 
 typedef int8_t s8;
 typedef int16_t s16;
+
+
+union u16split
+{
+	struct
+	{
+		u8 L;
+		u8 H;
+	};
+	uint16_t Full;
+};
+
