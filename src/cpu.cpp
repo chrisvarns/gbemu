@@ -529,6 +529,12 @@ void CPU::step()
 	}
 	// 0xC0
 	{
+	case Opcode::POP_BC:
+	{
+		reg.BC = Memory::LoadU16(reg.SP);
+		reg.SP += 2;
+		break;
+	}
 	case Opcode::PUSH_BC:
 	{
 		Memory::StoreU16(reg.SP, reg.BC);
