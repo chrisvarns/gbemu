@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <queue>
 
 #include "cpu.h"
 #include "math.h"
@@ -6,6 +7,7 @@
 #include "types.h"
 
 Registers reg;
+std::queue<void(*)(void)> instructions;
 
 enum class Opcode : u8
 {
@@ -282,181 +284,208 @@ enum class Opcode : u8
 	RST_38H		= 0xFF,
 };
 
+void ProcessOpcode(Opcode opcode);
 void ProcessOpcodeCB();
+
+
 
 void CPU::step()
 {
-	// Get opcode from Bus
-	Opcode opcode = (Opcode)Bus::LoadU8(reg.PC);
-	reg.PC++;
+	// note : each cpu sub operation takes 4 clock cycles
+	if (instructions.empty())
+	{
+		// note : read the next opcode from memory, 1 cpu cycle
+		Opcode opcode = (Opcode)Bus::LoadU8(reg.PC++);
+		ProcessOpcode(opcode);
+	}
+	else
+	{
+		// note : execute the next sub operation.
+		instructions.front()();
+		instructions.pop();
+	}
+};
 
+void ProcessOpcode(Opcode opcode)
+{
 	switch (opcode)
 	{
 	// 0x00
 	{
-	case Opcode::NOP:
+	case Opcode::NOP:			// 4
 	{
-		// Do nothing
+		// note : push nothing, the cpu cycle to read the op code is the delay.
 		break;
 	}
-	case Opcode::LD_BC_NN:
+	case Opcode::LD_BC_NN:		// 12
 	{
-		reg.C = Bus::LoadU8(reg.PC++);
-		reg.B = Bus::LoadU8(reg.PC++);
+		instructions.push([]() {reg.C = Bus::LoadU8(reg.PC++); });
+		instructions.push([]() {reg.B = Bus::LoadU8(reg.PC++); });
 		break;
 	}
-	case Opcode::INC_B:
+	case Opcode::INC_B:			// 4
 	{
+		// note : increment register is free operation.
 		Math::Inc(reg.B);
 		break;
 	}
-	case Opcode::DEC_B:
+	case Opcode::DEC_B:			// 4
 	{
+		// note : decrement register is free operation.
 		Math::Dec(reg.B);
 		break;
 	}
-	case Opcode::LD_B_N:
+	case Opcode::LD_B_N:		// 8
 	{
-		reg.B = Bus::LoadU8(reg.PC);
-		reg.PC++;
+		instructions.push([]() { reg.B = Bus::LoadU8(reg.PC++); });
 		break;
 	}
-	case Opcode::LD_A_$BC:
+	case Opcode::LD_A_$BC:		// 8
 	{
-		reg.A = Bus::LoadU8(reg.BC);
+		instructions.push([] { reg.A = Bus::LoadU8(reg.BC); });
 		break;
 	}
-	case Opcode::INC_C:
+	case Opcode::INC_C:			// 4
 	{
+		// note : increment register is a free operation.
 		Math::Inc(reg.C);
 		break;
 	}
-	case Opcode::LD_C_N:
+	case Opcode::LD_C_N:		// 8
 	{
-		reg.C = Bus::LoadU8(reg.PC);
-		reg.PC++;
+		instructions.push([]() { reg.C = Bus::LoadU8(reg.PC++); });
 		break;
 	}
 	}
 	// 0x10
 	{
-	case Opcode::LD_DE_NN:
+	case Opcode::LD_DE_NN:		// 12
 	{
-		reg.E = Bus::LoadU8(reg.PC++);
-		reg.D = Bus::LoadU8(reg.PC++);
+		instructions.push([]() { reg.E = Bus::LoadU8(reg.PC++); });
+		instructions.push([]() { reg.D = Bus::LoadU8(reg.PC++); });
 		break;
 	}
-	case Opcode::INC_D:
+	case Opcode::INC_D:			// 4
 	{
+		// note : increment register is a free operation.
 		Math::Inc(reg.D);
 		break;
 	}
-	case Opcode::LD_D_N:
+	case Opcode::LD_D_N:		// 8
 	{
-		reg.D = Bus::LoadU8(reg.PC);
-		reg.PC++;
+		instructions.push([]() { reg.D = Bus::LoadU8(reg.PC++); });
 		break;
 	}
-	case Opcode::RLA:
+	case Opcode::RLA:			// 4
 	{
+		// note : rotate is a free operation.
 		Math::RotateLeft(reg.A);
 		break;
 	}
-	case Opcode::LD_A_$DE:
+	case Opcode::LD_A_$DE:		// 8
 	{
-		reg.A = Bus::LoadU8(reg.DE);
+		instructions.push([]() { reg.A = Bus::LoadU8(reg.DE); });
 		break;
 	}
-	case Opcode::INC_E:
+	case Opcode::INC_E:			// 4
 	{
+		// note : increment register is free operation.
 		Math::Inc(reg.E);
 		break;
 	}
-	case Opcode::LD_E_N:
+	case Opcode::LD_E_N:		// 8
 	{
-		reg.E = Bus::LoadU8(reg.PC);
-		reg.PC++;
+		instructions.push([]() { reg.E = Bus::LoadU8(reg.PC++); });
 		break;
 	}
 	}
 	// 0x20
 	{
-	case Opcode::JR_NZ_N:
+	case Opcode::JR_NZ_N:		// 12 / 8
 	{
-		s8 n = s8(Bus::LoadU8(reg.PC));
-		reg.PC++; // The immediate value is part of the instruction
 		if (!(reg.F & (u8)Flags::Z))
 		{
-			reg.PC += n;
+			instructions.push([]() 
+			{ 
+				s8 n = s8(Bus::LoadU8(reg.PC++));
+				reg.PC += n;
+			});
+		}
+		else
+		{
+			instructions.push([]() { reg.PC++; });
 		}
 		break;
 	}
-	case Opcode::LD_HL_NN:
+	case Opcode::LD_HL_NN:		// 12
 	{
-		reg.L = Bus::LoadU8(reg.PC++);
-		reg.H = Bus::LoadU8(reg.PC++);
+		instructions.push([]() { reg.L = Bus::LoadU8(reg.PC++); });
+		instructions.push([]() { reg.H = Bus::LoadU8(reg.PC++); });
 		break;
 	}
-	case Opcode::INC_H:
+	case Opcode::INC_H:			// 4
 	{
+		// note : incrementing register is a free operation.
 		Math::Inc(reg.H);
 		break;
 	}
-	case Opcode::LD_H_N:
+	case Opcode::LD_H_N:		// 8
 	{
-		reg.H = Bus::LoadU8(reg.PC);
-		reg.PC++;
+		instructions.push([]() { reg.H = Bus::LoadU8(reg.PC++); });
 		break;
 	}
 	case Opcode::INC_L:
 	{
+		// note : incrementing register is a free operation.
 		Math::Inc(reg.L);
 		break;
 	}
-	case Opcode::LD_L_N:
+	case Opcode::LD_L_N:		// 8
 	{
-		reg.L = Bus::LoadU8(reg.PC);
-		reg.PC++;
+		instructions.push([]() { reg.L = Bus::LoadU8(reg.PC++); });
 		break;
 	}
 	}
 	// 0x30
 	{
-	case Opcode::LD_SP_NN:
+	case Opcode::LD_SP_NN:		// 12
 	{
-		reg.SP_P = Bus::LoadU8(reg.PC++);
-		reg.SP_S = Bus::LoadU8(reg.PC++);
+		instructions.push([]() { reg.SP_P = Bus::LoadU8(reg.PC++); });
+		instructions.push([]() { reg.SP_S = Bus::LoadU8(reg.PC++); });
 		break;
 	}
-	case Opcode::LD_$HLD_A:
+	case Opcode::LD_$HLD_A:		// 8
 	{
-		Bus::StoreU8(reg.HL, reg.A);
-		reg.HL--;
+		instructions.push([]() { Bus::StoreU8(reg.HL--, reg.A); });
 		break;
 	}
-	case Opcode::INC_$HL:
+	case Opcode::INC_$HL:		// 12
 	{
-		u8 value = Bus::LoadU8(reg.HL);
-		Math::Inc(value);
-		Bus::StoreU8(reg.HL, value);
+		instructions.push([]() { reg.temp.H = Bus::LoadU8(reg.HL); });
+		instructions.push([]()
+		{
+			Math::Inc(reg.temp.H);
+			Bus::StoreU8(reg.HL, reg.temp.H);
+		});
 		break;
 	}
 	case Opcode::INC_A:
 	{
+		// note : incrementing register is a free operation.
 		Math::Inc(reg.A);
 		break;
 	}
-	case Opcode::LD_A_N:
+	case Opcode::LD_A_N:		// 8
 	{
-		reg.A = Bus::LoadU8(reg.PC);
-		reg.PC++;
+		instructions.push([]() { reg.A = Bus::LoadU8(reg.PC++); });
 		break;
 	}
 	}
 	// 0x40
 	{
-	case Opcode::LD_C_A:
+	case Opcode::LD_C_A:		// 4
 	{
+		// note : move between registers is a free operation.
 		reg.C = reg.A;
 		break;
 	}
@@ -469,48 +498,55 @@ void CPU::step()
 	}
 	// 0x70
 	{
-	case Opcode::LD_$HL_A:
+	case Opcode::LD_$HL_A:		// 8
 	{
-		Bus::StoreU8(reg.HL, reg.A);
+		instructions.push([]() { Bus::StoreU8(reg.HL, reg.A); });
 		break;
 	}
-	case Opcode::LD_A_B:
+	case Opcode::LD_A_B:		// 4
 	{
+		// note : move between registers is a free operation.
 		reg.A = reg.B;
 		break;
 	}
-	case Opcode::LD_A_C:
+	case Opcode::LD_A_C:		// 4
 	{
+		// note : move between registers is a free operation.
 		reg.A = reg.C;
 		break;
 	}
-	case Opcode::LD_A_D:
+	case Opcode::LD_A_D:		// 4
 	{
+		// note : move between registers is a free operation.
 		reg.A = reg.D;
 		break;
 	}
-	case Opcode::LD_A_E:
+	case Opcode::LD_A_E:		// 4
 	{
+		// note : move between registers is a free operation.
 		reg.A = reg.E;
 		break;
 	}
-	case Opcode::LD_A_H:
+	case Opcode::LD_A_H:		// 4
 	{
+		// note : move between registers is a free operation.
 		reg.A = reg.H;
 		break;
 	}
-	case Opcode::LD_A_L:
+	case Opcode::LD_A_L:		// 4
 	{
+		// note : move between registers is a free operation.
 		reg.A = reg.L;
 		break;
 	}
-	case Opcode::LD_A_$HL:
+	case Opcode::LD_A_$HL:		// 8
 	{
-		reg.A = Bus::LoadU8(reg.HL);
+		instructions.push([]() { reg.A = Bus::LoadU8(reg.HL); });
 		break;
 	}
-	case Opcode::LD_A_A:
+	case Opcode::LD_A_A:		// 4
 	{
+		// note : move between registers is a free operation.
 		reg.A = reg.A;
 		break;
 	}
@@ -523,8 +559,9 @@ void CPU::step()
 	}
 	// 0xA0
 	{
-	case Opcode::XOR_A:
+	case Opcode::XOR_A:			// 4
 	{
+		// note : xor is a free operation.
 		Math::Xor(reg.A);
 		break;
 	}
@@ -534,31 +571,33 @@ void CPU::step()
 	}
 	// 0xC0
 	{
-	case Opcode::POP_BC:
+	case Opcode::POP_BC:		// 12
 	{
-		reg.C = Bus::LoadU8(reg.SP++);
-		reg.B = Bus::LoadU8(reg.SP++);
+		instructions.push([]() { reg.C = Bus::LoadU8(reg.SP++); });
+		instructions.push([]() { reg.B = Bus::LoadU8(reg.SP++); });
 		break;
 	}
-	case Opcode::PUSH_BC:
+	case Opcode::PUSH_BC:		// 16
 	{
-		Bus::StoreU8(--reg.SP, reg.B);
-		Bus::StoreU8(--reg.SP, reg.C);
+		instructions.push([]() { Bus::StoreU8(--reg.SP, reg.B); });
+		instructions.push([]() { Bus::StoreU8(--reg.SP, reg.C); });
+		instructions.push([]() {; }); // todo (luke) : why is this 16 cycles. what is the extra delay for?
 		break;
 	}
-	case Opcode::PREFIX_CB:
+	case Opcode::PREFIX_CB:		// 4
 	{
+		// note : evaulate the extended opcode table.
 		ProcessOpcodeCB();
 		break;
 	}
-	case Opcode::CALL_NN:
+	case Opcode::CALL_NN:		// 24
 	{
 		u16split val;
-		val.H = Bus::LoadU8(reg.PC++);
-		val.L = Bus::LoadU8(reg.PC++);
-		Bus::StoreU8(--reg.SP, reg.PC_P);
-		Bus::StoreU8(--reg.SP, reg.PC_C);
-		reg.PC = val.Full;
+		instructions.push([]() { reg.temp.H = Bus::LoadU8(reg.PC++); });
+		instructions.push([]() { reg.temp.L = Bus::LoadU8(reg.PC++); });
+		instructions.push([]() { Bus::StoreU8(--reg.SP, reg.PC_P); });
+		instructions.push([]() { Bus::StoreU8(--reg.SP, reg.PC_C); });
+		instructions.push([]() { reg.PC = reg.temp.Full; });
 		break;
 	}
 	}
@@ -567,36 +606,30 @@ void CPU::step()
 	}
 	// 0xE0
 	{
-	case Opcode::LDH_$N_A:
+	case Opcode::LDH_$N_A:		// 12
 	{
-		u8 n = Bus::LoadU8(reg.PC);
-		reg.PC++;
-		u16 addr = 0xFF00 + n;
-		Bus::StoreU8(addr, reg.A);
+		instructions.push([]() { reg.temp.Full = 0xFF00 + Bus::LoadU8(reg.PC++); });
+		instructions.push([]() { Bus::StoreU8(reg.temp.Full, reg.A); });
 		break;
 	}
-	case Opcode::LD_$C_A:
+	case Opcode::LD_$C_A:		// 8
 	{
-		u16 addr = 0xFF00 + reg.C;
-		Bus::StoreU8(addr, reg.A);
+		instructions.push([]() { Bus::StoreU8(0xFF00 + reg.C, reg.A); });
 		break;
 	}
 	}
 	// 0xF0
 	{
-	case Opcode::LD_A_$NN:
+	case Opcode::LD_A_$NN:		// 18
 	{
-		u16split val;
-		val.H = Bus::LoadU8(reg.PC++);
-		val.L = Bus::LoadU8(reg.PC++);
-		reg.A = Bus::LoadU8(val.Full);
+		instructions.push([]() { reg.temp.H = Bus::LoadU8(reg.PC++); });
+		instructions.push([]() { reg.temp.L = Bus::LoadU8(reg.PC++); });
+		instructions.push([]() { reg.A = Bus::LoadU8(reg.temp.Full); });
 		break;
 	}
-	case Opcode::CP_N:
+	case Opcode::CP_N:			// 8
 	{
-		u8 n = Bus::LoadU8(reg.PC);
-		reg.PC++;
-		Math::Compare(n);
+		instructions.push([]() { Math::Compare(Bus::LoadU8(reg.PC++)); });
 		break;
 	}
 	}

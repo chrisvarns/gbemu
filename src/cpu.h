@@ -62,6 +62,8 @@ struct Registers
 		};
 		u16 PC = 0x00;
 	};
+
+	u16split temp;
 };
 
 extern Registers reg;
@@ -71,3 +73,4 @@ class CPU
 public:
 	static void step();
 };
+
