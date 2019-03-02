@@ -314,7 +314,7 @@ void ProcessOpcode(Opcode opcode)
 	{
 
 	// 0x00 4
-	case Opcode::NOP:			
+	case Opcode::NOP:
 	{
 		// note : push nothing, the cpu cycle to read the op code is the delay.
 		break;
@@ -332,12 +332,14 @@ void ProcessOpcode(Opcode opcode)
 	case Opcode::LD_$BC_A:		
 	{
 		instructions.push([]() { Bus::StoreU8(reg.BC, reg.A); });
+		break;
 	}
 
 	// 0x03 8
 	case Opcode::INC_BC:		
 	{
 		instructions.push([]() { Math::Inc(reg.BC); });
+		break;
 	}
 
 	// 0x04 4
@@ -366,25 +368,77 @@ void ProcessOpcode(Opcode opcode)
 	// 0x07 4
 	case Opcode::RLCA:			
 	{
-
+		// note : rotate is a free operation.
+		// note : rotate operations that are not exteded opcodes will always reset the zero flag
+		float c = reg.A & 0x80;
+		reg.F = c ? (u8)Flags::C : 0;
+		reg.A = (reg.A << 1) | (c ? u8(1) : u8(0));
+		break;
 	}
 
-	case Opcode::LD_A_$BC:		// 8
+	// 0x08 20
+	case Opcode::LD_$NN_SP:
+	{
+		instructions.push([]() { reg.temp.L = Bus::LoadU8(reg.PC++); });
+		instructions.push([]() { reg.temp.H = Bus::LoadU8(reg.PC++); });
+		instructions.push([]() { Bus::StoreU8(reg.temp.Full, reg.SP_P); });
+		instructions.push([]() { Bus::StoreU8(reg.temp.Full + 1, reg.SP_S); });
+		break;
+	}
+
+	//0x09 8
+	case Opcode::ADD_HL_BC:
+	{
+		instructions.push([]() { reg.BC = Math::Add(reg.BC, reg.HL); });
+		break;
+	}
+
+	// 0x0A 8
+	case Opcode::LD_A_$BC:
 	{
 		instructions.push([] { reg.A = Bus::LoadU8(reg.BC); });
 		break;
 	}
-	case Opcode::INC_C:			// 4
+
+	// 0x0B 8
+	case Opcode::DEC_BC:
+	{
+		instructions.push([]() { Math::Dec(reg.BC); });
+		break;
+	}
+
+	// 0x0C 4
+	case Opcode::INC_C:
 	{
 		// note : increment register is a free operation.
 		Math::Inc(reg.C);
 		break;
 	}
-	case Opcode::LD_C_N:		// 8
+
+	// 0x0D 4
+	case Opcode::DEC_C:
+	{
+		Math::Dec(reg.C);
+		break;
+	}
+
+	// 0x0E 8
+	case Opcode::LD_C_N:
 	{
 		instructions.push([]() { reg.C = Bus::LoadU8(reg.PC++); });
 		break;
 	}
+
+	// 0x0F 4
+	case Opcode::RRCA:
+	{
+		// note : rotate is a free operation.
+		// note : rotate operations that are not exteded opcodes will always reset the zero flag
+		float c = reg.A & 0x01;
+		reg.F = c ? (u8)Flags::C : 0;
+		reg.A = (reg.A >> 1) | (c ? u8(0x80) : u8(0));
+	}
+
 	}
 	// 0x10
 	{
