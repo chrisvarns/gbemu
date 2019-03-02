@@ -310,7 +310,7 @@ void ProcessOpcode(Opcode opcode)
 {
 	switch (opcode)
 	{
-	// 0x00
+	// Group 0x00
 	{
 
 	// 0x00 4
@@ -437,29 +437,67 @@ void ProcessOpcode(Opcode opcode)
 		float c = reg.A & 0x01;
 		reg.F = c ? (u8)Flags::C : 0;
 		reg.A = (reg.A >> 1) | (c ? u8(0x80) : u8(0));
+		break;
 	}
 
 	}
-	// 0x10
+	// Group 0x10
 	{
-	case Opcode::LD_DE_NN:		// 12
+
+	// 0x10 4
+	case Opcode::STOP_0:
+	{
+		assert(false);		// todo : this still needs implementation. guess the cpu needs some kind of tracked state.
+		break;
+	}
+
+	// 0x11 12
+	case Opcode::LD_DE_NN:
 	{
 		instructions.push([]() { reg.E = Bus::LoadU8(reg.PC++); });
 		instructions.push([]() { reg.D = Bus::LoadU8(reg.PC++); });
 		break;
 	}
-	case Opcode::INC_D:			// 4
+
+	// 0x12 8
+	case Opcode::LD_$DE_A:
+	{
+		instructions.push([]() { Bus::StoreU8(reg.DE, reg.A); });
+		break;
+	}
+
+	// 0x13 8
+	case Opcode::INC_DE:
+	{
+		instructions.push([]() { Math::Inc(reg.DE); });
+		break;
+	}
+
+	// 0x14 4
+	case Opcode::INC_D:
 	{
 		// note : increment register is a free operation.
 		Math::Inc(reg.D);
 		break;
 	}
-	case Opcode::LD_D_N:		// 8
+
+	// 0x15 4
+	case Opcode::DEC_D:
+	{
+		// note : decrement register is a free operation.
+		Math::Dec(reg.D);
+		break;
+	}
+
+	// 0x16 8
+	case Opcode::LD_D_N:
 	{
 		instructions.push([]() { reg.D = Bus::LoadU8(reg.PC++); });
 		break;
 	}
-	case Opcode::RLA:			// 4
+
+	// 0x17 4
+	case Opcode::RLA:
 	{
 		// note : rotate is a free operation.
 		// note : rotate operations that are not exteded opcodes will always reset the zero flag
@@ -468,38 +506,78 @@ void ProcessOpcode(Opcode opcode)
 		reg.A = reg.A << 1;
 		break;
 	}
-	case Opcode::LD_A_$DE:		// 8
+
+	// 0x18 12
+	case Opcode::JR_N:
+	{
+		instructions.push([]() { reg.temp.L = Bus::LoadU8(reg.PC++); });
+		instructions.push([]() { reg.PC += s8(reg.temp.L); });	// todo : verify signed number casting is performing correct arithmetic
+		break;
+	}
+
+	// 0x19 8
+	case Opcode::ADD_HL_DE:
+	{
+		instructions.push([]() { reg.HL = Math::Add(reg.HL, reg.DE); });
+		break;
+	}
+
+	// 0x1A 8
+	case Opcode::LD_A_$DE:
 	{
 		instructions.push([]() { reg.A = Bus::LoadU8(reg.DE); });
 		break;
 	}
-	case Opcode::INC_E:			// 4
+
+	// 0x01B 8
+	case Opcode::DEC_DE:
+	{
+		instructions.push([]() { Math::Dec(reg.DE); });
+		break;
+	}
+
+	// 0x1C 4
+	case Opcode::INC_E:
 	{
 		// note : increment register is free operation.
 		Math::Inc(reg.E);
 		break;
 	}
-	case Opcode::LD_E_N:		// 8
+
+	// 0x1D 4
+	case Opcode::DEC_E:
+	{
+		Math::Dec(reg.E);
+		break;
+	}
+
+	// 0x1E 8
+	case Opcode::LD_E_N:
 	{
 		instructions.push([]() { reg.E = Bus::LoadU8(reg.PC++); });
 		break;
 	}
+
+	// 0x1F 4
+	case Opcode::RRA:
+	{
+		// note : rotate is a free operation.
+		// note : rotate operations that are not exteded opcodes will always reset the zero flag
+		float c = reg.A & 0x01;
+		reg.F = c ? (u8)Flags::C : 0;
+		reg.A = reg.A >> 1;
+		break;
+	}
+
 	}
 	// 0x20
 	{
 	case Opcode::JR_NZ_N:		// 12 / 8
 	{
-		if (!(reg.F & (u8)Flags::Z))
+		instructions.push([]() { reg.temp.L = Bus::LoadU8(reg.PC++); });
+		if ((reg.F & (u8)Flags::Z) == 0)
 		{
-			instructions.push([]() 
-			{ 
-				s8 n = s8(Bus::LoadU8(reg.PC++));
-				reg.PC += n;
-			});
-		}
-		else
-		{
-			instructions.push([]() { reg.PC++; });
+			instructions.push([]() { reg.PC += s8(reg.temp.L); });	// todo : verify signed number casting is performing correct arithmetic
 		}
 		break;
 	}
