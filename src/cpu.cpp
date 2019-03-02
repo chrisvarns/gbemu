@@ -312,34 +312,63 @@ void ProcessOpcode(Opcode opcode)
 	{
 	// 0x00
 	{
-	case Opcode::NOP:			// 4
+
+	// 0x00 4
+	case Opcode::NOP:			
 	{
 		// note : push nothing, the cpu cycle to read the op code is the delay.
 		break;
 	}
-	case Opcode::LD_BC_NN:		// 12
+
+	// 0x01 12
+	case Opcode::LD_BC_NN:		
 	{
-		instructions.push([]() {reg.C = Bus::LoadU8(reg.PC++); });
-		instructions.push([]() {reg.B = Bus::LoadU8(reg.PC++); });
+		instructions.push([]() { reg.C = Bus::LoadU8(reg.PC++); });
+		instructions.push([]() { reg.B = Bus::LoadU8(reg.PC++); });
 		break;
 	}
-	case Opcode::INC_B:			// 4
+
+	// 0x02 8
+	case Opcode::LD_$BC_A:		
+	{
+		instructions.push([]() { Bus::StoreU8(reg.BC, reg.A); });
+	}
+
+	// 0x03 8
+	case Opcode::INC_BC:		
+	{
+		instructions.push([]() { Math::Inc(reg.BC); });
+	}
+
+	// 0x04 4
+	case Opcode::INC_B:			
 	{
 		// note : increment register is free operation.
 		Math::Inc(reg.B);
 		break;
 	}
-	case Opcode::DEC_B:			// 4
+
+	// 0x05 4
+	case Opcode::DEC_B:			
 	{
 		// note : decrement register is free operation.
 		Math::Dec(reg.B);
 		break;
 	}
-	case Opcode::LD_B_N:		// 8
+
+	// 0x06 8
+	case Opcode::LD_B_N:		
 	{
 		instructions.push([]() { reg.B = Bus::LoadU8(reg.PC++); });
 		break;
 	}
+
+	// 0x07 4
+	case Opcode::RLCA:			
+	{
+
+	}
+
 	case Opcode::LD_A_$BC:		// 8
 	{
 		instructions.push([] { reg.A = Bus::LoadU8(reg.BC); });
@@ -379,7 +408,10 @@ void ProcessOpcode(Opcode opcode)
 	case Opcode::RLA:			// 4
 	{
 		// note : rotate is a free operation.
-		Math::RotateLeft(reg.A);
+		// note : rotate operations that are not exteded opcodes will always reset the zero flag
+		float c = reg.A & 0x80;
+		reg.F = c ? (u8)Flags::C : 0;
+		reg.A = reg.A << 1;
 		break;
 	}
 	case Opcode::LD_A_$DE:		// 8
@@ -595,8 +627,8 @@ void ProcessOpcode(Opcode opcode)
 		u16split val;
 		instructions.push([]() { reg.temp.H = Bus::LoadU8(reg.PC++); });
 		instructions.push([]() { reg.temp.L = Bus::LoadU8(reg.PC++); });
-		instructions.push([]() { Bus::StoreU8(--reg.SP, reg.PC_P); });
 		instructions.push([]() { Bus::StoreU8(--reg.SP, reg.PC_C); });
+		instructions.push([]() { Bus::StoreU8(--reg.SP, reg.PC_P); });
 		instructions.push([]() { reg.PC = reg.temp.Full; });
 		break;
 	}
