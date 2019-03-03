@@ -370,7 +370,7 @@ void ProcessOpcode(Opcode opcode)
 	{
 		// note : rotate is a free operation.
 		// note : rotate operations that are not exteded opcodes will always reset the zero flag
-		float c = reg.A & 0x80;
+		bool c = reg.A & 0x80;
 		reg.F = c ? (u8)Flags::C : 0;
 		reg.A = (reg.A << 1) | (c ? u8(1) : u8(0));
 		break;
@@ -434,7 +434,7 @@ void ProcessOpcode(Opcode opcode)
 	{
 		// note : rotate is a free operation.
 		// note : rotate operations that are not exteded opcodes will always reset the zero flag
-		float c = reg.A & 0x01;
+		bool c = reg.A & 0x01;
 		reg.F = c ? (u8)Flags::C : 0;
 		reg.A = (reg.A >> 1) | (c ? u8(0x80) : u8(0));
 		break;
@@ -501,7 +501,7 @@ void ProcessOpcode(Opcode opcode)
 	{
 		// note : rotate is a free operation.
 		// note : rotate operations that are not exteded opcodes will always reset the zero flag
-		float c = reg.A & 0x80;
+		bool c = reg.A & 0x80;
 		reg.F = c ? (u8)Flags::C : 0;
 		reg.A = reg.A << 1;
 		break;
@@ -563,7 +563,7 @@ void ProcessOpcode(Opcode opcode)
 	{
 		// note : rotate is a free operation.
 		// note : rotate operations that are not exteded opcodes will always reset the zero flag
-		float c = reg.A & 0x01;
+		bool c = reg.A & 0x01;
 		reg.F = c ? (u8)Flags::C : 0;
 		reg.A = reg.A >> 1;
 		break;
