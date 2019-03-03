@@ -580,14 +580,6 @@ void CheckTiming(Opcode opcode)
 		|| instructions.size() == (opTiming.ifNotTaken / 4 - 1));
 }
 
-void CheckTimingCB(Opcode_CB opcode)
-{
-	u8 opcodeVal = (u8)opcode & 0x07; // Mast off all but the bottom 3 bits
-	u8 expectedUops = opcodeVal == 0x06 ? 3 : 1;
-
-	assert(instructions.size() == expectedUops);
-}
-
 void CPU::step()
 {
 	// note : each cpu sub operation takes 4 clock cycles
@@ -1377,6 +1369,14 @@ enum class Opcode_CB : u8
 	SET_7_$HL	= 0xFE,
 	SET_7_A		= 0xFF,
 };
+
+void CheckTimingCB(Opcode_CB opcode)
+{
+	u8 opcodeVal = (u8)opcode & 0x07; // Mast off all but the bottom 3 bits
+	u8 expectedUops = opcodeVal == 0x06 ? 3 : 1;
+
+	assert(instructions.size() == expectedUops);
+}
 
 void ProcessOpcodeCB()
 {
