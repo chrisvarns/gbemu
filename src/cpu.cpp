@@ -574,10 +574,13 @@ void ProcessOpcodeCB();
 
 void CheckTiming(Opcode opcode)
 {
-	OpcodeTiming opTiming = OpcodeTimings[(u8)opcode];
+	if (opcode != Opcode::PREFIX_CB)
+	{
+		OpcodeTiming opTiming = OpcodeTimings[(u8)opcode];
 
-	assert(instructions.size() == (opTiming.ifTaken / 4 - 1)
-		|| instructions.size() == (opTiming.ifNotTaken / 4 - 1));
+		assert(instructions.size() == (opTiming.ifTaken / 4 - 1)
+			|| instructions.size() == (opTiming.ifNotTaken / 4 - 1));
+	}
 }
 
 void CPU::step()
