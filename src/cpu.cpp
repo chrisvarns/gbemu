@@ -1450,7 +1450,7 @@ void ProcessOpcodeCB()
 	{
 	case Opcode_CB::BIT_7_H:
 	{
-		Math::Bit(reg.H, 7);
+		instructions.push([]() { Math::Bit(reg.H, 7); });
 		break;
 	}
 	}
