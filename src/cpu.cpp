@@ -284,10 +284,301 @@ enum class Opcode : u8
 	RST_38H		= 0xFF,
 };
 
+struct OpcodeTiming
+{
+	u8 ifTaken = 0;
+	u8 ifNotTaken = 0;
+
+	OpcodeTiming(u8 a) : ifTaken(a), ifNotTaken(a) {};
+	OpcodeTiming(u8 a, u8 b) : ifTaken(a), ifNotTaken(b) {};
+};
+
+static OpcodeTiming OpcodeTimings[0x100]
+{
+	// 0x00
+	OpcodeTiming(4),
+	OpcodeTiming(12),
+	OpcodeTiming(8),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	OpcodeTiming(20),
+	OpcodeTiming(8),
+	OpcodeTiming(8),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	// 0x10
+	OpcodeTiming(4),
+	OpcodeTiming(12),
+	OpcodeTiming(8),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	OpcodeTiming(12),
+	OpcodeTiming(8),
+	OpcodeTiming(8),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	// 0x20
+	OpcodeTiming(12, 8),
+	OpcodeTiming(12),
+	OpcodeTiming(8),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	OpcodeTiming(12, 8),
+	OpcodeTiming(8),
+	OpcodeTiming(8),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	// 0x30
+	OpcodeTiming(12, 8),
+	OpcodeTiming(12),
+	OpcodeTiming(8),
+	OpcodeTiming(8),
+	OpcodeTiming(12),
+	OpcodeTiming(12),
+	OpcodeTiming(12),
+	OpcodeTiming(4),
+	OpcodeTiming(12, 8),
+	OpcodeTiming(8),
+	OpcodeTiming(8),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	// 0x40
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	// 0x50
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	// 0x60
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	// 0x70
+	OpcodeTiming(8),
+	OpcodeTiming(8),
+	OpcodeTiming(8),
+	OpcodeTiming(8),
+	OpcodeTiming(8),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	// 0x80
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	// 0x90
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	// 0xA0
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	// 0xB0
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(4),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	// 0xC0
+	OpcodeTiming(20, 8),
+	OpcodeTiming(12),
+	OpcodeTiming(16, 12),
+	OpcodeTiming(16),
+	OpcodeTiming(24, 12),
+	OpcodeTiming(16),
+	OpcodeTiming(8),
+	OpcodeTiming(16),
+	OpcodeTiming(20, 8),
+	OpcodeTiming(16),
+	OpcodeTiming(16, 12),
+	OpcodeTiming(4),
+	OpcodeTiming(24, 12),
+	OpcodeTiming(24),
+	OpcodeTiming(8),
+	OpcodeTiming(16),
+	// 0xD0
+	OpcodeTiming(20, 8),
+	OpcodeTiming(12),
+	OpcodeTiming(16, 12),
+	OpcodeTiming(-1), // invalid instruction
+	OpcodeTiming(24, 12),
+	OpcodeTiming(16),
+	OpcodeTiming(8),
+	OpcodeTiming(16),
+	OpcodeTiming(20, 8),
+	OpcodeTiming(16),
+	OpcodeTiming(16, 12),
+	OpcodeTiming(-1), // invalid instruction
+	OpcodeTiming(24, 12),
+	OpcodeTiming(-1), // invalid instruction
+	OpcodeTiming(8),
+	OpcodeTiming(16),
+	// 0xE0
+	OpcodeTiming(12),
+	OpcodeTiming(12),
+	OpcodeTiming(8),
+	OpcodeTiming(-1), // invalid instruction
+	OpcodeTiming(-1), // invalid instruction
+	OpcodeTiming(16),
+	OpcodeTiming(8),
+	OpcodeTiming(16),
+	OpcodeTiming(16),
+	OpcodeTiming(4),
+	OpcodeTiming(16),
+	OpcodeTiming(-1), // invalid instruction
+	OpcodeTiming(-1), // invalid instruction
+	OpcodeTiming(-1), // invalid instruction
+	OpcodeTiming(8),
+	OpcodeTiming(16),
+	//0xF0
+	OpcodeTiming(12),
+	OpcodeTiming(12),
+	OpcodeTiming(8),
+	OpcodeTiming(4),
+	OpcodeTiming(-1), // invalid instruction
+	OpcodeTiming(16),
+	OpcodeTiming(8),
+	OpcodeTiming(16),
+	OpcodeTiming(12),
+	OpcodeTiming(8),
+	OpcodeTiming(16),
+	OpcodeTiming(4),
+	OpcodeTiming(-1), // invalid instruction
+	OpcodeTiming(-1), // invalid instruction
+	OpcodeTiming(8),
+	OpcodeTiming(17),
+};
+
 void ProcessOpcode(Opcode opcode);
 void ProcessOpcodeCB();
 
+void CheckTiming(Opcode opcode)
+{
+	OpcodeTiming opTiming = OpcodeTimings[(u8)opcode];
 
+	assert(instructions.size() == (opTiming.ifTaken / 4 - 1)
+		|| instructions.size() == (opTiming.ifNotTaken / 4 - 1));
+}
 
 void CPU::step()
 {
@@ -297,6 +588,7 @@ void CPU::step()
 		// note : read the next opcode from memory, 1 cpu cycle
 		Opcode opcode = (Opcode)Bus::LoadU8(reg.PC++);
 		ProcessOpcode(opcode);
+		CheckTiming(opcode);
 	}
 	else
 	{
