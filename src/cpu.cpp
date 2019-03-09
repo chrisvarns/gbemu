@@ -889,7 +889,10 @@ void ProcessOpcode(Opcode opcode)
 	}
 	case Opcode::LD_$HLI_A:
 	{
-		instructions.push([]() { Bus::StoreU8(reg.HL++, reg.A); });
+		instructions.push([]() {
+			Bus::StoreU8(reg.HL, reg.A);
+			Math::Inc(reg.HL);
+		});
 		break;
 	}
 	case Opcode::INC_H:			// 4
