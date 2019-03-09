@@ -14,12 +14,17 @@ u8 Bus::LoadU8(u16 address)
 	if (InRange(address, 0x0000, 0x4000))
 	{
 		// 16KB ROM bank #0
+		if (!InRange(address, 0x0000, 0x0100))
+		{
+			assert(false); // We're outside the DMG boot rom, need to actually load a ROM then.
+		}
 		return Memory::LoadU8(address);
 	}
 	else if (InRange(address, 0x4000, 0x8000))
 	{
 		// 16KB switchable ROM bank
 		// todo handle ROM bank switching.
+		assert(false); // We're outside the DMG boot rom, need to actually load a ROM then.
 		return Memory::LoadU8(address);
 	}
 	else if (InRange(address, 0x8000, 0xA000))
