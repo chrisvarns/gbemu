@@ -18,8 +18,8 @@ u8 Bus::LoadU8(u16 address)
 {
 	if (InRange(address, 0x0000, 0x0100))
 	{
-		// BootRom/Cart depends on switch
-		if (Memory::LoadU8((u8)SpecialRegisters::BOOTROM_SWITCH))
+		// Either bootrom or cart rom
+		if (Memory::LoadU8((u16)SpecialRegisters::BOOTROM_SWITCH))
 		{
 			// 16KB ROM bank #0
 			return Memory::LoadU8(address);
