@@ -1383,7 +1383,7 @@ void CheckTimingCB(Opcode_CB opcode_cb)
 	u8 opcodeVal = (u8)opcode_cb & 0x07; // Mast off all but the bottom 3 bits
 	u8 expectedUops = opcodeVal == 0x06 ? 3 : 1;
 
-	assert(instructions.size() == expectedUops);
+	assert(instructions.size() == expectedUops && "Unexpected instruction count");
 }
 
 void ProcessOpcodeCB()
