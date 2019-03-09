@@ -895,6 +895,11 @@ void ProcessOpcode(Opcode opcode)
 		});
 		break;
 	}
+	case Opcode::INC_HL:
+	{
+		Math::Inc(reg.HL);
+		break;
+	}
 	case Opcode::INC_H:			// 4
 	{
 		// note : incrementing register is a free operation.
