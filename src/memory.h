@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include "types.h"
 
 namespace Memory
@@ -7,5 +8,7 @@ namespace Memory
 	void StoreU8(u16 address, u8 val);
 
 	void Init();
+	void LoadGameRom();
+	extern std::string gameromPath;
 };
 
