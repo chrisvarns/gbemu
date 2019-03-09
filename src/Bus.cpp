@@ -55,7 +55,6 @@ u8 Bus::LoadU8(u16 address)
 	else if (InRange(address, 0xC000, 0xE000))
 	{
 		// 8KB Internal RAM
-		// todo handle RAM bank switching
 		return Memory::LoadU8(address);
 	}
 	else if (InRange(address, 0xE000, 0xFE00))
@@ -121,7 +120,6 @@ void Bus::StoreU8(u16 address, u8 val)
 	else if (InRange(address, 0xC000, 0xE000))
 	{
 		// 8KB Internal RAM
-		// todo handle RAM bank switching
 		Memory::StoreU8(address, val);
 	}
 	else if (InRange(address, 0xE000, 0xFE00))
