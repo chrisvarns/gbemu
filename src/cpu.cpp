@@ -1063,8 +1063,9 @@ void ProcessOpcode(Opcode opcode)
 	}
 	case Opcode::RET:
 	{
-		instructions.push([]() { reg.PC_P = Bus::LoadU8(--reg.SP); });
-		instructions.push([]() { reg.PC_C = Bus::LoadU8(--reg.SP); });
+		instructions.push([]() { reg.temp.L = Bus::LoadU8(reg.SP++); });
+		instructions.push([]() { reg.temp.H = Bus::LoadU8(reg.SP++); });
+		instructions.push([]() { reg.PC = reg.temp.Full; });
 	}
 	case Opcode::PREFIX_CB:		// 4
 	{
