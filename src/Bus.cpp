@@ -21,7 +21,7 @@ u8 Bus::LoadU8(u16 address)
 		// Either bootrom or cart rom
 		if (Memory::LoadU8((u16)SpecialRegisters::BOOTROM_SWITCH))
 		{
-			// 16KB ROM bank #0
+			// 16KB Cartridge ROM bank #0
 			return Memory::LoadU8(address);
 		}
 		else
@@ -32,13 +32,12 @@ u8 Bus::LoadU8(u16 address)
 	}
 	else if (InRange(address, 0x0100, 0x4000))
 	{
-		// 16KB ROM bank #0
+		// 16KB Cartridge ROM bank #0
 		return Memory::LoadU8(address);
 	}
 	else if (InRange(address, 0x4000, 0x8000))
 	{
-		// 16KB switchable ROM bank
-		// todo handle ROM bank switching.
+		// 16KB Cartridge ROM bank (switchable via MBC, some titles)
 		assert(false); // We're outside the DMG boot rom, need to actually load a ROM then.
 		return Memory::LoadU8(address);
 	}
@@ -75,7 +74,7 @@ u8 Bus::LoadU8(u16 address)
 	}
 	else if (InRange(address, 0xFEA0, 0xFF00))
 	{
-		// Empty but unusable for I/O
+		// Unusable
 		assert(false);
 		return 0;
 	}
@@ -86,14 +85,13 @@ u8 Bus::LoadU8(u16 address)
 	}
 	else if (InRange(address, 0xFF4C, 0xFF80))
 	{
-		// Empty but unusable for I/O
+		// Unusable
 		assert(false);
 		return 0;
 	}
 	else if (InRange(address, 0xFF80, 0xFFFF))
 	{
 		// Internal RAM
-		// todo ?
 		return Memory::LoadU8(address);
 	}
 	else
@@ -141,7 +139,7 @@ void Bus::StoreU8(u16 address, u8 val)
 	}
 	else if (InRange(address, 0xFEA0, 0xFF00))
 	{
-		// Empty but unusable for I/O
+		// Unusable
 		assert(false);
 	}
 	else if (InRange(address, 0xFF00, 0xFF4C))
@@ -151,13 +149,12 @@ void Bus::StoreU8(u16 address, u8 val)
 	}
 	else if (InRange(address, 0xFF4C, 0xFF80))
 	{
-		// Empty but unusable for I/O
+		// Unusable
 		assert(false);
 	}
 	else if (InRange(address, 0xFF80, 0xFFFF))
 	{
 		// Internal RAM
-		// todo ?
 		Memory::StoreU8(address, val);
 	}
 	else
