@@ -599,8 +599,9 @@ void CPU::step()
 	else
 	{
 		// note : execute the next sub operation.
-		instructions.front()();
+		auto instruction = instructions.front();
 		instructions.pop();
+		instruction();
 	}
 };
 
