@@ -1101,6 +1101,13 @@ void ProcessOpcode(Opcode opcode)
 		break;
 	}
 	}
+	case Opcode::LD_$NN_A:
+	{
+		instructions.push([]() { reg.temp.L = Bus::LoadU8(reg.PC++); });
+		instructions.push([]() { reg.temp.H = Bus::LoadU8(reg.PC++); });
+		instructions.push([]() { Bus::StoreU8(reg.temp.Full, reg.A); });
+		break;
+	}
 	// 0xF0
 	{
 	case Opcode::LD_A_$NN:		// 18
