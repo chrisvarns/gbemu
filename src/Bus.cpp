@@ -102,8 +102,7 @@ void Bus::StoreU8(u16 address, u8 val)
 	else if (InRange(address, 0x8000, 0xA000))
 	{
 		// 8KB Video RAM
-		// todo handle VRAM
-		assert(false);
+		Memory::StoreU8(address, val);
 	}
 	else if (InRange(address, 0xA000, 0xC000))
 	{
