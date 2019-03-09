@@ -1061,6 +1061,11 @@ void ProcessOpcode(Opcode opcode)
 		instructions.push([]() {; }); // todo (luke) : why is this 16 cycles. what is the extra delay for?
 		break;
 	}
+	case Opcode::RET:
+	{
+		instructions.push([]() { reg.PC_P = Bus::LoadU8(--reg.SP); });
+		instructions.push([]() { reg.PC_C = Bus::LoadU8(--reg.SP); });
+	}
 	case Opcode::PREFIX_CB:		// 4
 	{
 		// note : evaluate the extended opcode table.
