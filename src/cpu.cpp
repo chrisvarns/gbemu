@@ -1066,6 +1066,7 @@ void ProcessOpcode(Opcode opcode)
 		instructions.push([]() { reg.temp.L = Bus::LoadU8(reg.SP++); });
 		instructions.push([]() { reg.temp.H = Bus::LoadU8(reg.SP++); });
 		instructions.push([]() { reg.PC = reg.temp.Full; });
+		break;
 	}
 	case Opcode::PREFIX_CB:		// 4
 	{
