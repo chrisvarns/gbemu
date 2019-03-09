@@ -887,6 +887,11 @@ void ProcessOpcode(Opcode opcode)
 		instructions.push([]() { reg.H = Bus::LoadU8(reg.PC++); });
 		break;
 	}
+	case Opcode::LD_$HLI_A:
+	{
+		instructions.push([]() { Bus::StoreU8(reg.HL++, reg.A); });
+		break;
+	}
 	case Opcode::INC_H:			// 4
 	{
 		// note : incrementing register is a free operation.
