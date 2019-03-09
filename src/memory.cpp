@@ -15,3 +15,7 @@ void Memory::StoreU8(u16 address, u8 val)
 	memory[address] = val;
 }
 
+void Memory::Init()
+{
+	memset(memory, 0, 0x10000);
+}
