@@ -867,7 +867,6 @@ void ProcessOpcode(Opcode opcode)
 		reg.A = reg.A >> 1;
 		break;
 	}
-
 	}
 	// 0x20
 	{
@@ -1051,7 +1050,7 @@ void ProcessOpcode(Opcode opcode)
 	case Opcode::PREFIX_CB:		// 4
 	{
 		// note : evaluate the extended opcode table.
-		ProcessOpcodeCB();
+		instructions.push([]() { ProcessOpcodeCB(); });
 		break;
 	}
 	case Opcode::CALL_NN:		// 24
@@ -1382,6 +1381,7 @@ void CheckTimingCB(Opcode_CB opcode_cb)
 {
 	u8 opcodeVal = (u8)opcode_cb & 0x07; // Mast off all but the bottom 3 bits
 	u8 expectedUops = opcodeVal == 0x06 ? 3 : 1;
+	--expectedUops; // We effectively spent 4 cycles when we loaded the opcode initially.
 
 	assert(instructions.size() == expectedUops && "Unexpected instruction count");
 }
@@ -1399,37 +1399,36 @@ void ProcessOpcodeCB()
 	{
 	case Opcode_CB::RL_B:
 	{
-		instructions.push([]() { Math::RotateLeft(reg.B); });
+		Math::RotateLeft(reg.B);
 		break;
 	}
 	case Opcode_CB::RL_C:
 	{
-		instructions.push([]() { Math::RotateLeft(reg.C); });
+		Math::RotateLeft(reg.C);
 		break;
 	}
 	case Opcode_CB::RL_D:
 	{
-		instructions.push([]() { Math::RotateLeft(reg.D); });
+		Math::RotateLeft(reg.D);
 		break;
 	}
 	case Opcode_CB::RL_E:
 	{
-		instructions.push([]() { Math::RotateLeft(reg.E); });
+		Math::RotateLeft(reg.E);
 		break;
 	}
 	case Opcode_CB::RL_H:
 	{
-		instructions.push([]() { Math::RotateLeft(reg.H); });
+		Math::RotateLeft(reg.H);
 		break;
 	}
 	case Opcode_CB::RL_L:
 	{
-		instructions.push([]() { Math::RotateLeft(reg.L); });
+		Math::RotateLeft(reg.L);
 		break;
 	}
 	case Opcode_CB::RL_$HL:
 	{
-		instructions.push([]() { /* No side effects during instruction load */ });
 		instructions.push([]()
 		{
 			u8 val = Bus::LoadU8(reg.HL);
@@ -1441,7 +1440,7 @@ void ProcessOpcodeCB()
 	}
 	case Opcode_CB::RL_A:
 	{
-		instructions.push([]() { Math::RotateLeft(reg.A); });
+		Math::RotateLeft(reg.A);
 		break;
 	}
 	}
@@ -1464,7 +1463,7 @@ void ProcessOpcodeCB()
 	{
 	case Opcode_CB::BIT_7_H:
 	{
-		instructions.push([]() { Math::Bit(reg.H, 7); });
+		Math::Bit(reg.H, 7);
 		break;
 	}
 	}
