@@ -21,21 +21,18 @@ u8 Bus::LoadU8(u16 address)
 		// BootRom/Cart depends on switch
 		if (Memory::LoadU8((u8)SpecialRegisters::BOOTROM_SWITCH))
 		{
-			assert(false); // We're outside the DMG boot rom, need to actually load a ROM then.
+			// 16KB ROM bank #0
 			return Memory::LoadU8(address);
 		}
 		else
 		{
+			// Boot ROM
 			return BootRom::LoadU8(address);
 		}
 	}
 	else if (InRange(address, 0x0100, 0x4000))
 	{
 		// 16KB ROM bank #0
-		if (!InRange(address, 0x0000, 0x0100))
-		{
-			assert(false); // We're outside the DMG boot rom, need to actually load a ROM then.
-		}
 		return Memory::LoadU8(address);
 	}
 	else if (InRange(address, 0x4000, 0x8000))
