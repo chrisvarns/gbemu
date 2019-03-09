@@ -984,6 +984,11 @@ void ProcessOpcode(Opcode opcode)
 	}
 	// 0x50
 	{
+	case Opcode::LD_D_A:
+	{
+		reg.D = reg.A;
+		break;
+	}
 	}
 	// 0x60
 	{
