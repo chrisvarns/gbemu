@@ -952,6 +952,11 @@ void ProcessOpcode(Opcode opcode)
 		Math::Inc(reg.A);
 		break;
 	}
+	case Opcode::DEC_A:
+	{
+		Math::Dec(reg.A);
+		break;
+	}
 	case Opcode::LD_A_N:		// 8
 	{
 		instructions.push([]() { reg.A = Bus::LoadU8(reg.PC++); });
