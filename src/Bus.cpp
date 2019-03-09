@@ -104,7 +104,22 @@ void Bus::StoreU8(u16 address, u8 val)
 	if (InRange(address, 0x0000, 0x8000))
 	{
 		// 32KB ROM space
-		assert(false && "Illegal write to ROM");
+		if (InRange(address, 0x0000, 0x2000))
+		{
+			// TODO RAM Bank Enable
+		}
+		else if (InRange(address, 0x2000, 0x4000))
+		{
+			// TODO ROM Bank Select
+		}
+		else if (InRange(address, 0x4000, 0x6000))
+		{
+			// TODO RAM Bank Select
+		}
+		else if (InRange(address, 0x6000, 0x8000))
+		{
+			// TODO MBC1 ROM/RAM Select
+		}
 	}
 	else if (InRange(address, 0x8000, 0xA000))
 	{
