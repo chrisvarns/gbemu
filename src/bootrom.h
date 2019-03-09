@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include "types.h"
 
 namespace BootRom
@@ -7,5 +8,6 @@ namespace BootRom
 
 	void LoadFromDisk();
 
+	extern std::string bootromPath;
 	extern u8 bootrom[0x0100];
 }
