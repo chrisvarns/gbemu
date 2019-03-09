@@ -1399,44 +1399,49 @@ void ProcessOpcodeCB()
 	{
 	case Opcode_CB::RL_B:
 	{
-		Math::RotateLeft(reg.B);
+		instructions.push([]() { Math::RotateLeft(reg.B); });
 		break;
 	}
 	case Opcode_CB::RL_C:
 	{
-		Math::RotateLeft(reg.C);
+		instructions.push([]() { Math::RotateLeft(reg.C); });
 		break;
 	}
 	case Opcode_CB::RL_D:
 	{
-		Math::RotateLeft(reg.D);
+		instructions.push([]() { Math::RotateLeft(reg.D); });
 		break;
 	}
 	case Opcode_CB::RL_E:
 	{
-		Math::RotateLeft(reg.E);
+		instructions.push([]() { Math::RotateLeft(reg.E); });
 		break;
 	}
 	case Opcode_CB::RL_H:
 	{
-		Math::RotateLeft(reg.H);
+		instructions.push([]() { Math::RotateLeft(reg.H); });
 		break;
 	}
 	case Opcode_CB::RL_L:
 	{
-		Math::RotateLeft(reg.L);
+		instructions.push([]() { Math::RotateLeft(reg.L); });
 		break;
 	}
 	case Opcode_CB::RL_$HL:
 	{
-		u8 val = Bus::LoadU8(reg.HL);
-		Math::RotateLeft(val);
-		Bus::StoreU8(reg.HL, val);
+		instructions.push([]() { /* No side effects during instruction load */ });
+		instructions.push([]()
+		{
+			u8 val = Bus::LoadU8(reg.HL);
+			Math::RotateLeft(val);
+			reg.temp.L = val;
+		});
+		instructions.push([]() { Bus::StoreU8(reg.HL, reg.temp.L); });
 		break;
 	}
 	case Opcode_CB::RL_A:
 	{
-		Math::RotateLeft(reg.A);
+		instructions.push([]() { Math::RotateLeft(reg.A); });
 		break;
 	}
 	}
