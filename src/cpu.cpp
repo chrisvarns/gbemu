@@ -286,11 +286,11 @@ enum class Opcode : u8
 
 struct OpcodeTiming
 {
-	u8 ifTaken = 0;
-	u8 ifNotTaken = 0;
+	s8 ifTaken = 0;
+	s8 ifNotTaken = 0;
 
-	OpcodeTiming(u8 a) : ifTaken(a), ifNotTaken(a) {};
-	OpcodeTiming(u8 a, u8 b) : ifTaken(a), ifNotTaken(b) {};
+	OpcodeTiming(s8 a) : ifTaken(a), ifNotTaken(-1) {};
+	OpcodeTiming(s8 a, s8 b) : ifTaken(a), ifNotTaken(b) {};
 };
 
 static OpcodeTiming OpcodeTimings[0x100]
@@ -572,14 +572,18 @@ static OpcodeTiming OpcodeTimings[0x100]
 void ProcessOpcode(Opcode opcode);
 void ProcessOpcodeCB();
 
-void CheckTiming(Opcode opcode)
+void CheckTiming(Opcode opcode, bool conditionalActionTaken)
 {
 	if (opcode != Opcode::PREFIX_CB)
 	{
 		OpcodeTiming opTiming = OpcodeTimings[(u8)opcode];
 
-		assert(instructions.size() == (opTiming.ifTaken / 4 - 1)
-			|| instructions.size() == (opTiming.ifNotTaken / 4 - 1));
+		s8 cycles = conditionalActionTaken ? opTiming.ifTaken : opTiming.ifNotTaken;
+		assert(cycles >= 0 && "Negative cycles");
+
+		int expectedInstructions = (cycles) / 4;
+		--expectedInstructions; // We effectively spent 4 cycles when we loaded the opcode initially.
+		assert(instructions.size() == expectedInstructions && "Unexpected instruction count");
 	}
 }
 
@@ -591,7 +595,6 @@ void CPU::step()
 		// note : read the next opcode from memory, 1 cpu cycle
 		Opcode opcode = (Opcode)Bus::LoadU8(reg.PC++);
 		ProcessOpcode(opcode);
-		CheckTiming(opcode);
 	}
 	else
 	{
@@ -603,6 +606,7 @@ void CPU::step()
 
 void ProcessOpcode(Opcode opcode)
 {
+	bool conditionalActionTaken = true;
 	switch (opcode)
 	{
 	// Group 0x00
@@ -870,7 +874,8 @@ void ProcessOpcode(Opcode opcode)
 	case Opcode::JR_NZ_N:		// 12 / 8
 	{
 		instructions.push([]() { reg.temp.L = Bus::LoadU8(reg.PC++); });
-		if ((reg.F & (u8)Flags::Z) == 0)
+		conditionalActionTaken = (reg.F & (u8)Flags::Z) == 0;
+		if (conditionalActionTaken)
 		{
 			instructions.push([]() { reg.PC += s8(reg.temp.L); });	// todo : verify signed number casting is performing correct arithmetic
 		}
@@ -1095,6 +1100,7 @@ void ProcessOpcode(Opcode opcode)
 		assert(false && "Unknown opcode");
 		break;
 	}
+	CheckTiming(opcode, conditionalActionTaken);
 }
 
 enum class Opcode_CB : u8
