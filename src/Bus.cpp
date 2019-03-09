@@ -27,58 +27,63 @@ u8 Bus::LoadU8(u16 address)
 		// 8KB Video RAM
 		// todo handle VRAM
 		assert(false);
+		return 0;
 	}
 	else if (InRange(address, 0xA000, 0xC000))
 	{
  		// 8KB switchable RAM bank
 		// todo handle RAM bank switching
-		Memory::LoadU8(address);
+		return Memory::LoadU8(address);
 	}
 	else if (InRange(address, 0xC000, 0xE000))
 	{
 		// 8KB Internal RAM
 		// todo handle RAM bank switching
-		Memory::LoadU8(address);
+		return Memory::LoadU8(address);
 	}
 	else if (InRange(address, 0xE000, 0xFE00))
 	{
 		// echo of 8KB Internal RAM
-		Memory::LoadU8(address - 0x2000);
+		return Memory::LoadU8(address - 0x2000);
 	}
 	else if (InRange(address, 0xFE00, 0xFEA0))
 	{
 		// Sprite Attrib Memory (OAM)
 		// todo
 		assert(false);
+		return 0;
 	}
 	else if (InRange(address, 0xFEA0, 0xFF00))
 	{
 		// Empty but unusable for I/O
 		assert(false);
+		return 0;
 	}
 	else if (InRange(address, 0xFF00, 0xFF4C))
 	{
 		// I/O ports
 		// todo
 		assert(false);
+		return 0;
 	}
 	else if (InRange(address, 0xFF4C, 0xFF80))
 	{
 		// I/O ports
 		// Empty but unusable for I/O
 		assert(false);
+		return 0;
 	}
 	else if (InRange(address, 0xFF80, 0xFFFF))
 	{
 		// Internal RAM
 		// todo ?
-		Memory::LoadU8(address);
+		return Memory::LoadU8(address);
 	}
 	else
 	{
 		assert(address == 0xFFFF);
 		// Interrupt Enable Register
-		Memory::LoadU8(address);
+		return Memory::LoadU8(address);
 	}
 }
 
