@@ -1050,7 +1050,7 @@ void ProcessOpcode(Opcode opcode)
 	}
 	case Opcode::PREFIX_CB:		// 4
 	{
-		// note : evaulate the extended opcode table.
+		// note : evaluate the extended opcode table.
 		ProcessOpcodeCB();
 		break;
 	}
