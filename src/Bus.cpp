@@ -150,8 +150,7 @@ void Bus::StoreU8(u16 address, u8 val)
 	else if (InRange(address, 0xFF00, 0xFF4C))
 	{
 		// I/O ports
-		// todo
-		assert(false);
+		Memory::StoreU8(address, val);
 	}
 	else if (InRange(address, 0xFF4C, 0xFF80))
 	{
