@@ -1051,8 +1051,8 @@ void ProcessOpcode(Opcode opcode)
 	}
 	case Opcode::CALL_NN:		// 24
 	{
-		instructions.push([]() { reg.temp.H = Bus::LoadU8(reg.PC++); });
 		instructions.push([]() { reg.temp.L = Bus::LoadU8(reg.PC++); });
+		instructions.push([]() { reg.temp.H = Bus::LoadU8(reg.PC++); });
 		instructions.push([]() { Bus::StoreU8(--reg.SP, reg.PC_C); });
 		instructions.push([]() { Bus::StoreU8(--reg.SP, reg.PC_P); });
 		instructions.push([]() { reg.PC = reg.temp.Full; });
