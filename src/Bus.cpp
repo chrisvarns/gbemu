@@ -44,9 +44,7 @@ u8 Bus::LoadU8(u16 address)
 	else if (InRange(address, 0x8000, 0xA000))
 	{
 		// 8KB Video RAM
-		// todo handle VRAM
-		assert(false);
-		return 0;
+		return Memory::LoadU8(address);
 	}
 	else if (InRange(address, 0xA000, 0xC000))
 	{
