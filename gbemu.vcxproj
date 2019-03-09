@@ -115,6 +115,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\bootrom.cpp" />
     <ClCompile Include="src\Bus.cpp" />
     <ClCompile Include="src\memory.cpp" />
     <ClCompile Include="src\cpu.cpp" />
@@ -122,6 +123,7 @@
     <ClCompile Include="src\math.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\bootrom.h" />
     <ClInclude Include="src\Bus.h" />
     <ClInclude Include="src\memory.h" />
     <ClInclude Include="src\cpu.h" />

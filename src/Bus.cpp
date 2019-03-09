@@ -1,8 +1,13 @@
 #include "bus.h"
 #include "memory.h"
+#include "bootrom.h"
 
-#include <fstream>
 #include <assert.h>
+
+enum class SpecialRegisters
+{
+	BOOTROM_SWITCH = 0xFF50
+};
 
 bool InRange(u16 address, u16 lowerInclusive, u16 upperExclusive)
 {
@@ -11,7 +16,20 @@ bool InRange(u16 address, u16 lowerInclusive, u16 upperExclusive)
 
 u8 Bus::LoadU8(u16 address)
 {
-	if (InRange(address, 0x0000, 0x4000))
+	if (InRange(address, 0x0000, 0x0100))
+	{
+		// BootRom/Cart depends on switch
+		if (Memory::LoadU8((u8)SpecialRegisters::BOOTROM_SWITCH))
+		{
+			assert(false); // We're outside the DMG boot rom, need to actually load a ROM then.
+			return Memory::LoadU8(address);
+		}
+		else
+		{
+			return BootRom::LoadU8(address);
+		}
+	}
+	else if (InRange(address, 0x0100, 0x4000))
 	{
 		// 16KB ROM bank #0
 		if (!InRange(address, 0x0000, 0x0100))
@@ -67,13 +85,10 @@ u8 Bus::LoadU8(u16 address)
 	else if (InRange(address, 0xFF00, 0xFF4C))
 	{
 		// I/O ports
-		// todo
-		assert(false);
-		return 0;
+		return Memory::LoadU8(address);
 	}
 	else if (InRange(address, 0xFF4C, 0xFF80))
 	{
-		// I/O ports
 		// Empty but unusable for I/O
 		assert(false);
 		return 0;
@@ -140,7 +155,6 @@ void Bus::StoreU8(u16 address, u8 val)
 	}
 	else if (InRange(address, 0xFF4C, 0xFF80))
 	{
-		// I/O ports
 		// Empty but unusable for I/O
 		assert(false);
 	}

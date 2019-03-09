@@ -43,12 +43,3 @@ void Memory::StoreU8(u16 address, u8 val)
 //	memory[address + 1] = msb;
 //}
 
-void Memory::LoadBootRom()
-{
-	std::ifstream file;
-	file.open("assets\\DMG_ROM.bin", std::ifstream::binary);
-	assert(file);
-	file.read((char*)memory, 256);
-	file.close();
-}
-

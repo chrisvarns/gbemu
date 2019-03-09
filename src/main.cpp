@@ -1,9 +1,9 @@
 #include "cpu.h"
-#include "memory.h"
+#include "bootrom.h"
 
 int main()
 {
-	Memory::LoadBootRom();
+	BootRom::LoadFromDisk();
 	while (true)
 	{
 		CPU::step();
