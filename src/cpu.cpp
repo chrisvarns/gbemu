@@ -1071,8 +1071,8 @@ void ProcessOpcode(Opcode opcode)
 	{
 		instructions.push([]() { reg.temp.L = Bus::LoadU8(reg.PC++); });
 		instructions.push([]() { reg.temp.H = Bus::LoadU8(reg.PC++); });
-		instructions.push([]() { Bus::StoreU8(--reg.SP, reg.PC_C); });
 		instructions.push([]() { Bus::StoreU8(--reg.SP, reg.PC_P); });
+		instructions.push([]() { Bus::StoreU8(--reg.SP, reg.PC_C); });
 		instructions.push([]() { reg.PC = reg.temp.Full; });
 		break;
 	}
