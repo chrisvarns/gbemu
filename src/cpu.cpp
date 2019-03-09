@@ -897,7 +897,7 @@ void ProcessOpcode(Opcode opcode)
 	}
 	case Opcode::INC_HL:
 	{
-		Math::Inc(reg.HL);
+		instructions.push([]() { Math::Inc(reg.HL); });
 		break;
 	}
 	case Opcode::INC_H:			// 4
