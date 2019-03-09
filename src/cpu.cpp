@@ -911,6 +911,17 @@ void ProcessOpcode(Opcode opcode)
 		instructions.push([]() { reg.H = Bus::LoadU8(reg.PC++); });
 		break;
 	}
+	case Opcode::JR_Z_N:
+	{
+		instructions.push([]() {
+			auto val = Bus::LoadU8(reg.PC++);
+			if (reg.F & (u8)Flags::Z)
+			{
+				reg.PC += val;
+			}
+		});
+		break;
+	}
 	case Opcode::INC_L:
 	{
 		// note : incrementing register is a free operation.
