@@ -1059,6 +1059,11 @@ void ProcessOpcode(Opcode opcode)
 	}
 	// 0x90
 	{
+	case Opcode::SUB_B:
+	{
+		Math::Sub(reg.B);
+		break;
+	}
 	}
 	// 0xA0
 	{
