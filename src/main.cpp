@@ -26,10 +26,12 @@ int main(int argc, char** argv)
 	int clock = 0;
 	while (true)
 	{
-		if((clock % 4) == 0)
+		if ((clock % 4) == 0)
+		{
 			CPU::Step();
-		if ((clock % 2) == 0)
-			PPU::Step();
+		}
+		PPU::Step();
+		clock += 2;
 	}
 	return 0;
 }
