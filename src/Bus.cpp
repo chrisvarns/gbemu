@@ -12,6 +12,7 @@ u8 HandleIORead(u16 address)
 	case SpecialRegister::SOUND_NR11:
 	case SpecialRegister::SOUND_NR12:
 	case SpecialRegister::SOUND_NR13:
+	case SpecialRegister::SOUND_NR14:
 	case SpecialRegister::SOUND_NR50:
 	case SpecialRegister::SOUND_NR51:
 	case SpecialRegister::SOUND_NR52:
@@ -33,6 +34,7 @@ void HandleIOWrite(u16 address, u8 val)
 	case SpecialRegister::SOUND_NR11:
 	case SpecialRegister::SOUND_NR12:
 	case SpecialRegister::SOUND_NR13:
+	case SpecialRegister::SOUND_NR14:
 	case SpecialRegister::SOUND_NR50:
 	case SpecialRegister::SOUND_NR51:
 	case SpecialRegister::SOUND_NR52:
