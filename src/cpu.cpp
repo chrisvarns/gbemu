@@ -1056,6 +1056,11 @@ void ProcessOpcode(Opcode opcode)
 	}
 	// 0x80
 	{
+	case Opcode::ADD_A_$HL:
+	{
+		instructions.push([]() { reg.A = Math::Add(reg.A, Bus::LoadU8(reg.HL)); });
+		break;
+	}
 	}
 	// 0x90
 	{
