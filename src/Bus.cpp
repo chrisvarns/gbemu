@@ -195,15 +195,10 @@ void Bus::StoreU8(u16 address, u8 val)
 		// Unusable
 		assert(false);
 	}
-	else if (InRange(address, 0xFF00, 0xFF4C))
+	else if (InRange(address, 0xFF00, 0xFF80))
 	{
 		// I/O ports
 		HandleIOWrite(address, val);
-	}
-	else if (InRange(address, 0xFF4C, 0xFF80))
-	{
-		// Unusable
-		assert(false);
 	}
 	else if (InRange(address, 0xFF80, 0xFFFF))
 	{
