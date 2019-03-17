@@ -1076,6 +1076,11 @@ void ProcessOpcode(Opcode opcode)
 	}
 	// 0xB0
 	{
+	case Opcode::CP_$HL:
+	{
+		instructions.push([]() { Math::Compare(Bus::LoadU8(reg.HL)); });
+		break;
+	}
 	}
 	// 0xC0
 	{
