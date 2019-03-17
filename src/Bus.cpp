@@ -46,6 +46,7 @@ void HandleIOWrite(u16 address, u8 val)
 	case SpecialRegister::VIDEO_SCY:
 	case SpecialRegister::VIDEO_SCX:
 	case SpecialRegister::VIDEO_BGP:
+	case SpecialRegister::BOOTROM_SWITCH:
 	{
 		Memory::StoreU8(address, val);
 		break;
