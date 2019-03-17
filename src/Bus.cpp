@@ -1,17 +1,55 @@
+#include "bootrom.h"
 #include "bus.h"
 #include "memory.h"
-#include "bootrom.h"
-
+#include "specialRegisters.h"
+#include "utils.h"
 #include <assert.h>
 
-enum class SpecialRegisters
+u8 HandleIORead(u16 address)
 {
-	BOOTROM_SWITCH = 0xFF50
-};
+	switch (SpecialRegister(address))
+	{
+	case SpecialRegister::SOUND_NR11:
+	case SpecialRegister::SOUND_NR12:
+	case SpecialRegister::SOUND_NR50:
+	case SpecialRegister::SOUND_NR51:
+	case SpecialRegister::SOUND_NR52:
+	case SpecialRegister::VIDEO_SCY:
+	case SpecialRegister::VIDEO_SCX:
+	case SpecialRegister::VIDEO_LY:
+	{
+		return Memory::LoadU8(address);
+	}
+	}
+	assert(false);
+	return 0;
+}
 
-bool InRange(u16 address, u16 lowerInclusive, u16 upperExclusive)
+void HandleIOWrite(u16 address, u8 val)
 {
-	return address >= lowerInclusive && address < upperExclusive;
+	switch ((SpecialRegister)address)
+	{
+	case SpecialRegister::SOUND_NR11:
+	case SpecialRegister::SOUND_NR12:
+	case SpecialRegister::SOUND_NR50:
+	case SpecialRegister::SOUND_NR51:
+	case SpecialRegister::SOUND_NR52:
+	{
+		// todo
+		break;
+	}
+	case SpecialRegister::VIDEO_LCDC:
+	case SpecialRegister::VIDEO_SCY:
+	case SpecialRegister::VIDEO_SCX:
+	case SpecialRegister::VIDEO_BGP:
+	{
+		Memory::StoreU8(address, val);
+		break;
+	}
+	case SpecialRegister::VIDEO_LY:
+	default:
+		assert(false);
+	}
 }
 
 u8 Bus::LoadU8(u16 address)
@@ -19,7 +57,7 @@ u8 Bus::LoadU8(u16 address)
 	if (InRange(address, 0x0000, 0x0100))
 	{
 		// Either bootrom or cart rom
-		if (Memory::LoadU8((u16)SpecialRegisters::BOOTROM_SWITCH))
+		if (Memory::LoadU8((u16)SpecialRegister::BOOTROM_SWITCH))
 		{
 			// 16KB Cartridge ROM bank #0
 			return Memory::LoadU8(address);
@@ -78,7 +116,7 @@ u8 Bus::LoadU8(u16 address)
 	else if (InRange(address, 0xFF00, 0xFF4C))
 	{
 		// I/O ports
-		return Memory::LoadU8(address);
+		return HandleIORead(address);
 	}
 	else if (InRange(address, 0xFF4C, 0xFF80))
 	{
@@ -156,7 +194,7 @@ void Bus::StoreU8(u16 address, u8 val)
 	else if (InRange(address, 0xFF00, 0xFF4C))
 	{
 		// I/O ports
-		Memory::StoreU8(address, val);
+		HandleIOWrite(address, val);
 	}
 	else if (InRange(address, 0xFF4C, 0xFF80))
 	{

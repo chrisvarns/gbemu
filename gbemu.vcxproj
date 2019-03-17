@@ -115,20 +115,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ppu.cpp" />
     <ClCompile Include="src\bootrom.cpp" />
     <ClCompile Include="src\Bus.cpp" />
     <ClCompile Include="src\memory.cpp" />
     <ClCompile Include="src\cpu.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\math.cpp" />
+    <ClCompile Include="src\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ppu.h" />
     <ClInclude Include="src\bootrom.h" />
     <ClInclude Include="src\Bus.h" />
     <ClInclude Include="src\memory.h" />
     <ClInclude Include="src\cpu.h" />
     <ClInclude Include="src\math.h" />
+    <ClInclude Include="src\specialRegisters.h" />
     <ClInclude Include="src\types.h" />
+    <ClInclude Include="src\utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

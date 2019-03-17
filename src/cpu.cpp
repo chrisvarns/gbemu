@@ -587,7 +587,7 @@ void CheckTiming(Opcode opcode, bool conditionalActionTaken)
 	}
 }
 
-void CPU::step()
+void CPU::Step()
 {
 	// note : each cpu sub operation takes 4 clock cycles
 	if (instructions.empty())
@@ -607,6 +607,7 @@ void CPU::step()
 
 void ProcessOpcode(Opcode opcode)
 {
+	//printf("PC = 0x%x, 0x%x\n", reg.PC - 1, (u8)opcode);
 	bool conditionalActionTaken = true;
 	switch (opcode)
 	{
@@ -1448,6 +1449,7 @@ void CheckTimingCB(Opcode_CB opcode_cb)
 void ProcessOpcodeCB()
 {
 	Opcode_CB opcode_cb = (Opcode_CB)Bus::LoadU8(reg.PC);
+	//printf("PC = 0x%x, 0x%x\n", reg.PC, (u8)opcode_cb);
 	reg.PC++;
 	switch (opcode_cb)
 	{

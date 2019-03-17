@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include "cpu.h"
+#include "ppu.h"
 #include "bootrom.h"
 #include "memory.h"
 
@@ -22,9 +23,20 @@ int main(int argc, char** argv)
 	Memory::Init();
 	BootRom::LoadFromDisk();
 	Memory::LoadGameRom();
+	int clock = 0;
 	while (true)
 	{
-		CPU::step();
+		if((clock % 4) == 0)
+			CPU::Step();
+		if ((clock % 2) == 0)
+			PPU::Step();
 	}
 	return 0;
 }
+
+// TODO LIST
+// 0xFF00 .. 0xFFFF Special Registers, set values on reset?
+// Cartridge ROM bank switching, for titles that use it.
+// Cartridge RAM bank switching, for titles that use it. Similar to above.
+// Save RAM banks to disk, for titles with battery backed RAM banks.
+// Interrupts!

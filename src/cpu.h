@@ -71,6 +71,6 @@ extern Registers reg;
 class CPU
 {
 public:
-	static void step();
+	static void Step();
 };
 

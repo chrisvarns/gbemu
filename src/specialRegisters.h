@@ -1,0 +1,17 @@
+#pragma once
+#include "types.h"
+
+enum class SpecialRegister : u16
+{
+	SOUND_NR11 = 0xFF11,
+	SOUND_NR12 = 0xFF12,
+	SOUND_NR50 = 0xFF24,
+	SOUND_NR51 = 0xFF25,
+	SOUND_NR52 = 0xFF26,
+	VIDEO_LCDC = 0xFF40,
+	VIDEO_SCY = 0xFF42,
+	VIDEO_SCX = 0xFF43,
+	VIDEO_LY = 0xFF44,
+	VIDEO_BGP = 0xFF47,
+	BOOTROM_SWITCH = 0xFF50
+};
