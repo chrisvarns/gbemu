@@ -3,6 +3,8 @@
 
 const int gb_width = 160;
 const int gb_height = 144;
+const int bytes_per_pixel = 4;
+const int total_gb_display_bytes = gb_width * gb_height * bytes_per_pixel;
 
 enum class AddressRegion : u16
 {
@@ -55,4 +57,9 @@ enum class SpecialRegister : u16
 	VIDEO_BGP = 0xFF47,
 	BOOTROM_SWITCH = 0xFF50,
 	INTERRUPT_ENABLE = 0xFFFF,
+};
+
+enum class LCDC_FLAGS : u8
+{
+	LCD_POWER = 0x80,
 };

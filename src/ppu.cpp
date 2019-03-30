@@ -4,11 +4,6 @@
 #include "ppu.h"
 #include "utils.h"
 
-enum class LCDC_FLAGS : u8
-{
-	LCD_POWER = 0x80,
-};
-
 enum class PPU_STATE
 {
 	DISABLED,
@@ -29,24 +24,28 @@ static int current_h_cycle = -1;
 
 static SDL_Renderer* sdl_renderer = nullptr;
 static SDL_Texture* sdl_texture = nullptr;
-static u8* sdl_pixels = nullptr;
+
+static void* sdl_pixels = nullptr;
+static u8* sdl_pixels_write = nullptr;
+static bool sdl_texture_locked = false;
 
 void DrawDebugRed()
-{
-	void* pixels;
-	int pitch;
-	SDL_LockTexture(sdl_texture, nullptr, &pixels, &pitch);
-	u8* pixel_write = (u8*)pixels;
-	u8* pixel_end = pixel_write + (gb_width * gb_height * 4);
-	while (pixel_write != pixel_end)
+{	
+	int unused_pitch;
+	SDL_LockTexture(sdl_texture, nullptr, &sdl_pixels, &unused_pitch);
+	sdl_texture_locked = true;
+	sdl_pixels_write = (u8*)sdl_pixels;
+	u8* pixel_end = sdl_pixels_write + total_gb_display_bytes;
+	while (sdl_pixels_write != pixel_end)
 	{
-		*pixel_write++ = 255;
-		*pixel_write++ = 0;
-		*pixel_write++ = 0;
-		*pixel_write++ = 255;
+		*sdl_pixels_write++ = 255;
+		*sdl_pixels_write++ = 0;
+		*sdl_pixels_write++ = 0;
+		*sdl_pixels_write++ = 255;
 	}
 
 	SDL_UnlockTexture(sdl_texture);
+	sdl_texture_locked = false;
 	SDL_RenderCopy(sdl_renderer, sdl_texture, nullptr, nullptr);
 	SDL_RenderPresent(sdl_renderer);
 }
@@ -64,10 +63,24 @@ void Disable()
 {
 	current_h_cycle = -1;
 	Memory::StoreU8((u16)SpecialRegister::VIDEO_LY, 0);
+
+	// Clear the screen
+	if (!sdl_texture_locked)
+	{
+		int unused_pitch;
+		SDL_LockTexture(sdl_texture, nullptr, &sdl_pixels, &unused_pitch);
+		sdl_texture_locked = true;
+	}
+	memset(sdl_pixels, 0, total_gb_display_bytes);
+	SDL_UnlockTexture(sdl_texture);
+	sdl_texture_locked = false;
+	SDL_RenderCopy(sdl_renderer, sdl_texture, nullptr, nullptr);
+	SDL_RenderPresent(sdl_renderer);
 }
 
 void PPU::Step()
 {
+	// Handle being disabled
 	u8 lcdc_reg = Memory::LoadU8((u16)SpecialRegister::VIDEO_LCDC);
 	if ((lcdc_reg & (u8)LCDC_FLAGS::LCD_POWER) == 0)
 	{
@@ -79,7 +92,7 @@ void PPU::Step()
 		return;
 	}
 
-	// Set current h/v values
+	// Update current h/v values
 	u8 ly_reg = Memory::LoadU8((u16)SpecialRegister::VIDEO_LY);
 	current_h_cycle++;
 	if (current_h_cycle == LINE_LENGTH_NUM_CYCLES)
