@@ -149,7 +149,13 @@
     <ClInclude Include="src\types.h" />
     <ClInclude Include="src\utils.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="targets\CopyDLLs.targets">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="targets\CopyDLLs.targets" />
   </ImportGroup>
 </Project>
