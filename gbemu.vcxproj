@@ -139,13 +139,13 @@
     <ClCompile Include="src\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\constants.h" />
     <ClInclude Include="src\ppu.h" />
     <ClInclude Include="src\bootrom.h" />
     <ClInclude Include="src\Bus.h" />
     <ClInclude Include="src\memory.h" />
     <ClInclude Include="src\cpu.h" />
     <ClInclude Include="src\math.h" />
-    <ClInclude Include="src\specialRegisters.h" />
     <ClInclude Include="src\types.h" />
     <ClInclude Include="src\utils.h" />
   </ItemGroup>

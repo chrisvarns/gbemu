@@ -1,7 +1,7 @@
 #include "bootrom.h"
 #include "bus.h"
+#include "constants.h"
 #include "memory.h"
-#include "specialRegisters.h"
 #include "utils.h"
 #include <assert.h>
 
@@ -59,7 +59,7 @@ void HandleIOWrite(u16 address, u8 val)
 
 u8 Bus::LoadU8(u16 address)
 {
-	if (InRange(address, 0x0000, 0x0100))
+	if (InRange(address, AddressRegion::BOOTROM_START, AddressRegion::BOOTROM_END))
 	{
 		// Either bootrom or cart rom
 		if (Memory::LoadU8((u16)SpecialRegister::BOOTROM_SWITCH))
@@ -73,64 +73,63 @@ u8 Bus::LoadU8(u16 address)
 			return BootRom::LoadU8(address);
 		}
 	}
-	else if (InRange(address, 0x0100, 0x4000))
+	else if (InRange(address, AddressRegion::ROMBANK_STATIC_START, AddressRegion::ROMBANK_STATIC_END))
 	{
 		// 16KB Cartridge ROM bank #0
 		return Memory::LoadU8(address);
 	}
-	else if (InRange(address, 0x4000, 0x8000))
+	else if (InRange(address, AddressRegion::ROMBANK_SWITCHABLE_START, AddressRegion::ROMBANK_SWITCHABLE_END))
 	{
 		// 16KB Cartridge ROM bank (switchable via MBC, some titles)
-		assert(false); // We're outside the DMG boot rom, need to actually load a ROM then.
 		return Memory::LoadU8(address);
 	}
-	else if (InRange(address, 0x8000, 0xA000))
+	else if (InRange(address, AddressRegion::VRAM_START, AddressRegion::VRAM_END))
 	{
 		// 8KB Video RAM
 		return Memory::LoadU8(address);
 	}
-	else if (InRange(address, 0xA000, 0xC000))
+	else if (InRange(address, AddressRegion::RAMBANK_SWITCHABLE_START, AddressRegion::RAMBANK_SWITCHABLE_END))
 	{
  		// 8KB switchable RAM bank
 		// todo handle RAM bank switching
 		return Memory::LoadU8(address);
 	}
-	else if (InRange(address, 0xC000, 0xE000))
+	else if (InRange(address, AddressRegion::RAMBANK_INTERNAL_START, AddressRegion::RAMBANK_INTERNAL_END))
 	{
 		// 8KB Internal RAM
 		return Memory::LoadU8(address);
 	}
-	else if (InRange(address, 0xE000, 0xFE00))
+	else if (InRange(address, AddressRegion::RAMBANK_INTERNAL_ECHO_START, AddressRegion::RAMBANK_INTERNAL_ECHO_END))
 	{
 		// echo of 8KB Internal RAM
-		return Memory::LoadU8(address - 0x2000);
+		return Memory::LoadU8(address - ((u16)AddressRegion::RAMBANK_INTERNAL_ECHO_START - (u16)AddressRegion::RAMBANK_INTERNAL_START));
 	}
-	else if (InRange(address, 0xFE00, 0xFEA0))
+	else if (InRange(address, AddressRegion::OAM_START, AddressRegion::OAM_END))
 	{
 		// Sprite Attrib Memory (OAM)
 		// todo
 		assert(false);
 		return 0;
 	}
-	else if (InRange(address, 0xFEA0, 0xFF00))
+	else if (InRange(address, AddressRegion::OAM_END, AddressRegion::IO_START))
 	{
 		// Unusable
 		assert(false);
 		return 0;
 	}
-	else if (InRange(address, 0xFF00, 0xFF4C))
+	else if (InRange(address, AddressRegion::IO_START, AddressRegion::IO_END))
 	{
 		// I/O ports
 		return HandleIORead(address);
 	}
-	else if (InRange(address, 0xFF80, 0xFFFF))
+	else if (InRange(address, AddressRegion::ZEROPAGE_START, AddressRegion::ZEROPAGE_END))
 	{
 		// Internal RAM
 		return Memory::LoadU8(address);
 	}
 	else
 	{
-		assert(address == 0xFFFF);
+		assert(address == (u16)SpecialRegister::INTERRUPT_ENABLE);
 		// Interrupt Enable Register
 		return Memory::LoadU8(address);
 	}
@@ -138,71 +137,71 @@ u8 Bus::LoadU8(u16 address)
 
 void Bus::StoreU8(u16 address, u8 val)
 {
-	if (InRange(address, 0x0000, 0x8000))
+	if (InRange(address, AddressRegion::SELECT_START, AddressRegion::SELECT_END))
 	{
 		// 32KB ROM space
-		if (InRange(address, 0x0000, 0x2000))
+		if (InRange(address, AddressRegion::ROMBANK_STATIC_START, AddressRegion::ROMBANK_STATIC_END))
 		{
 			// TODO RAM Bank Enable
 		}
-		else if (InRange(address, 0x2000, 0x4000))
+		else if (InRange(address, AddressRegion::ROMBANK_SELECT_START, AddressRegion::ROMBANK_SELECT_END))
 		{
 			// TODO ROM Bank Select
 		}
-		else if (InRange(address, 0x4000, 0x6000))
+		else if (InRange(address, AddressRegion::RAMBANK_SELECT_START, AddressRegion::RAMBANK_SELECT_END))
 		{
 			// TODO RAM Bank Select
 		}
-		else if (InRange(address, 0x6000, 0x8000))
+		else if (InRange(address, AddressRegion::MBC1_SELECT_START, AddressRegion::MBC1_SELECT_END))
 		{
 			// TODO MBC1 ROM/RAM Select
 		}
 	}
-	else if (InRange(address, 0x8000, 0xA000))
+	else if (InRange(address, AddressRegion::VRAM_START, AddressRegion::VRAM_END))
 	{
 		// 8KB Video RAM
 		Memory::StoreU8(address, val);
 	}
-	else if (InRange(address, 0xA000, 0xC000))
+	else if (InRange(address, AddressRegion::RAMBANK_SWITCHABLE_START, AddressRegion::RAMBANK_SWITCHABLE_END))
 	{
 		// 8KB switchable RAM bank
 		// todo handle RAM bank switching
 		Memory::StoreU8(address, val);
 	}
-	else if (InRange(address, 0xC000, 0xE000))
+	else if (InRange(address, AddressRegion::RAMBANK_INTERNAL_START, AddressRegion::RAMBANK_INTERNAL_END))
 	{
 		// 8KB Internal RAM
 		Memory::StoreU8(address, val);
 	}
-	else if (InRange(address, 0xE000, 0xFE00))
+	else if (InRange(address, AddressRegion::RAMBANK_INTERNAL_ECHO_START, AddressRegion::RAMBANK_INTERNAL_ECHO_END))
 	{
 		// echo of 8KB Internal RAM
-		Memory::StoreU8(address - 0x2000, val);
+		Memory::StoreU8(address - ((u16)AddressRegion::RAMBANK_INTERNAL_ECHO_START - (u16)AddressRegion::RAMBANK_INTERNAL_START), val);
 	}
-	else if (InRange(address, 0xFE00, 0xFEA0))
+	else if (InRange(address, AddressRegion::OAM_START, AddressRegion::OAM_END))
 	{
 		// Sprite Attrib Memory (OAM)
 		// todo
 		assert(false);
 	}
-	else if (InRange(address, 0xFEA0, 0xFF00))
+	else if (InRange(address, AddressRegion::OAM_END, AddressRegion::IO_START))
 	{
 		// Unusable
 		assert(false);
 	}
-	else if (InRange(address, 0xFF00, 0xFF80))
+	else if (InRange(address, AddressRegion::IO_START, AddressRegion::IO_END))
 	{
 		// I/O ports
 		HandleIOWrite(address, val);
 	}
-	else if (InRange(address, 0xFF80, 0xFFFF))
+	else if (InRange(address, AddressRegion::ZEROPAGE_START, AddressRegion::ZEROPAGE_END))
 	{
 		// Internal RAM
 		Memory::StoreU8(address, val);
 	}
 	else
 	{
-		assert(address == 0xFFFF);
+		assert(address == (u16)SpecialRegister::INTERRUPT_ENABLE);
 		// Interrupt Enable Register
 		Memory::StoreU8(address, val);
 	}

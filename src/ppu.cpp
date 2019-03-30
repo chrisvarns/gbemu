@@ -1,6 +1,6 @@
+#include "constants.h"
 #include "memory.h"
 #include "ppu.h"
-#include "specialRegisters.h"
 #include "utils.h"
 
 enum class LCDC_FLAGS : u8

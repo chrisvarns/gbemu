@@ -3,6 +3,7 @@
 #include "cpu.h"
 #include "ppu.h"
 #include "bootrom.h"
+#include "constants.h"
 #include "memory.h"
 
 void ParseArgs(int argc, char** argv)

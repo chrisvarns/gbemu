@@ -59,13 +59,13 @@
     <ClInclude Include="src\bootrom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\specialRegisters.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\ppu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
