@@ -1,10 +1,12 @@
+#include <assert.h>
 #include <string.h>
 
-#include "cpu.h"
-#include "ppu.h"
 #include "bootrom.h"
 #include "constants.h"
+#include "cpu.h"
+#include "main.h"
 #include "memory.h"
+#include "ppu.h"
 
 SDL_Window* g_window;
 
@@ -39,6 +41,8 @@ int main(int argc, char** argv)
 	Memory::Init();
 	BootRom::LoadFromDisk();
 	Memory::LoadGameRom();
+	PPU::Init();
+
 	int clock = 0;
 	while (true)
 	{

@@ -2,5 +2,6 @@
 
 namespace PPU
 {
+	void Init();
 	void Step();
 }

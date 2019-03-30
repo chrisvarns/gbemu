@@ -1,4 +1,5 @@
 #include "constants.h"
+#include "main.h"
 #include "memory.h"
 #include "ppu.h"
 #include "utils.h"
@@ -25,6 +26,39 @@ const int NUM_LINES = 154;
 
 static PPU_STATE ppu_state = PPU_STATE::DISABLED;
 static int current_h_cycle = -1;
+
+static SDL_Renderer* sdl_renderer = nullptr;
+static SDL_Texture* sdl_texture = nullptr;
+static u8* sdl_pixels = nullptr;
+
+void DrawDebugRed()
+{
+	void* pixels;
+	int pitch;
+	SDL_LockTexture(sdl_texture, nullptr, &pixels, &pitch);
+	u8* pixel_write = (u8*)pixels;
+	u8* pixel_end = pixel_write + (gb_width * gb_height * 4);
+	while (pixel_write != pixel_end)
+	{
+		*pixel_write++ = 255;
+		*pixel_write++ = 0;
+		*pixel_write++ = 0;
+		*pixel_write++ = 255;
+	}
+
+	SDL_UnlockTexture(sdl_texture);
+	SDL_RenderCopy(sdl_renderer, sdl_texture, nullptr, nullptr);
+	SDL_RenderPresent(sdl_renderer);
+}
+
+void PPU::Init()
+{
+	sdl_renderer = SDL_CreateRenderer(g_window, -1, 0);
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 0);
+	sdl_texture = SDL_CreateTexture(sdl_renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, 160, 144);
+
+	DrawDebugRed();
+}
 
 void Disable()
 {
@@ -75,5 +109,6 @@ void PPU::Step()
 	else if (current_h_cycle == HBLANK_START)
 	{
 		ppu_state = PPU_STATE::HBLANK;
+		// todo generate HBLANK interrupt
 	}
 }
