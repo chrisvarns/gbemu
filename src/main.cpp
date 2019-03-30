@@ -13,7 +13,7 @@ void ParseArgs(int argc, char** argv)
 		std::string arg = argv[i++];
 		if (arg == "-gamerom")
 		{
-			Memory::gameromPath = argv[i++];
+			Memory::gamerom_path = argv[i++];
 		}
 	}
 }

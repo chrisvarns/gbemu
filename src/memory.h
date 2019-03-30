@@ -9,6 +9,6 @@ namespace Memory
 
 	void Init();
 	void LoadGameRom();
-	extern std::string gameromPath;
+	extern std::string gamerom_path;
 };
 
