@@ -123,12 +123,6 @@ u8 Bus::LoadU8(u16 address)
 		// I/O ports
 		return HandleIORead(address);
 	}
-	else if (InRange(address, 0xFF4C, 0xFF80))
-	{
-		// Unusable
-		assert(false);
-		return 0;
-	}
 	else if (InRange(address, 0xFF80, 0xFFFF))
 	{
 		// Internal RAM
