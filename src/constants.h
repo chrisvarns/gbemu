@@ -39,6 +39,12 @@ enum class AddressRegion : u16
 	MBC1_SELECT_START = 0x6000,
 	MBC1_SELECT_END = 0x8000,
 	SELECT_END = 0x8000,
+
+	// LCD control register controlled start addresses. Mode refers to whether relevant LCDC bit is set
+	BACKGROUND_TILE_MAP_MODE_0_START = 0x9800,
+	BACKGROUND_TILE_MAP_MODE_0_END = 0x9C00,
+	BACKGROUND_TILE_MAP_MODE_1_START = 0x9C00,
+	BACKGROUND_TILE_MAP_MODE_1_END = 0xA000,
 };
 
 enum class SpecialRegister : u16
