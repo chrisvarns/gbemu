@@ -1,15 +1,15 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <ItemGroup>
-        <Dlls Include="$(ProjectDir)3rdparty\**\$(Platform)\*.dll"/>
-    </ItemGroup>
+  <ItemGroup>
+	<Dlls Include="$(ProjectDir)3rdparty\**\$(Platform)\*.dll"/>
+  </ItemGroup>
 
-    <Target Name="CopyDlls"
-			AfterTargets="Build">
-	  <Message Importance="high" Text="[GBEMU] Copying %(Dlls.Identity)" />
-        <Copy
-            SourceFiles="@(Dlls)"
-            DestinationFolder="$(OutDir)"
-			SkipUnchangedFiles="true"
-        />
-    </Target>
+  <Target Name="CopyDlls"
+		  AfterTargets="Build"
+		  Inputs="@(Dlls)"
+		  Outputs="@(Dlls -> '$(OutDir)%(Filename)%(Extension)')">
+	<Message Importance="high" Text="[GBEMU] Copying %(Dlls.Identity)" />
+	<Copy SourceFiles="@(Dlls)"
+		  DestinationFolder="$(OutDir)"
+		  SkipUnchangedFiles="true"/>
+  </Target>
 </Project>
