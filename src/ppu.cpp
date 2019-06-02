@@ -90,6 +90,7 @@ static SDL_Texture* sdl_texture = nullptr;
 static u8* sdl_pixels = nullptr;
 static u8* sdl_pixels_write = nullptr;
 static bool sdl_texture_locked = false;
+static int current_frame_index = 0;
 
 void PresentBackBuffer()
 {
@@ -329,6 +330,8 @@ void StartNewFrame()
 		sdl_texture_locked = true;
 	}
 	sdl_pixels_write = sdl_pixels;
+
+	SDL_Log("Frame %d", ++current_frame_index);
 }
 
 void PPU::Step()
