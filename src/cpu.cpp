@@ -1099,7 +1099,7 @@ void ProcessOpcode(Opcode opcode)
 	{
 		instructions.push([]() { Bus::StoreU8(--reg.SP, reg.B); });
 		instructions.push([]() { Bus::StoreU8(--reg.SP, reg.C); });
-		instructions.push([]() {; }); // todo (luke) : why is this 16 cycles. what is the extra delay for?
+		instructions.push([]() { /* Do nothing */});
 		break;
 	}
 	case Opcode::RET:
