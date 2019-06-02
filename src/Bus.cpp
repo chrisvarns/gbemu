@@ -5,6 +5,12 @@
 #include "utils.h"
 #include <assert.h>
 
+namespace Bus
+{
+	// Special store used by PPU to allow writing to PPU registers
+	void StoreU8_PPU(u16 address, u8 val);
+}
+
 u8 HandleIORead(u16 address)
 {
 	switch (SpecialRegister(address))
@@ -16,9 +22,13 @@ u8 HandleIORead(u16 address)
 	case SpecialRegister::SOUND_NR50:
 	case SpecialRegister::SOUND_NR51:
 	case SpecialRegister::SOUND_NR52:
-	case SpecialRegister::VIDEO_SCY:
-	case SpecialRegister::VIDEO_SCX:
-	case SpecialRegister::VIDEO_LY:
+	case SpecialRegister::VIDEO_LCD_CONTROL:
+	case SpecialRegister::VIDEO_SCROLLY:
+	case SpecialRegister::VIDEO_SCROLLX:
+	case SpecialRegister::VIDEO_CURRENT_SCANLINE:
+	case SpecialRegister::VIDEO_BG_PALETTE:
+	case SpecialRegister::VIDEO_SPRITE0_PALETTE:
+	case SpecialRegister::VIDEO_SPRITE1_PALETTE:
 	{
 		return Memory::LoadU8(address);
 	}
@@ -42,16 +52,16 @@ void HandleIOWrite(u16 address, u8 val)
 		// todo
 		break;
 	}
-	case SpecialRegister::VIDEO_LCDC:
-	case SpecialRegister::VIDEO_SCY:
-	case SpecialRegister::VIDEO_SCX:
-	case SpecialRegister::VIDEO_BGP:
+	case SpecialRegister::VIDEO_LCD_CONTROL:
+	case SpecialRegister::VIDEO_SCROLLY:
+	case SpecialRegister::VIDEO_SCROLLX:
+	case SpecialRegister::VIDEO_BG_PALETTE:
 	case SpecialRegister::BOOTROM_SWITCH:
 	{
 		Memory::StoreU8(address, val);
 		break;
 	}
-	case SpecialRegister::VIDEO_LY:
+	case SpecialRegister::VIDEO_CURRENT_SCANLINE:
 	default:
 		assert(false);
 	}
@@ -205,5 +215,11 @@ void Bus::StoreU8(u16 address, u8 val)
 		// Interrupt Enable Register
 		Memory::StoreU8(address, val);
 	}
+}
+
+void Bus::StoreU8_PPU(u16 address, u8 val)
+{
+	assert(InRange(address, AddressRegion::VIDEO_REGISTER_BEGIN, AddressRegion::VIDEO_REGISTER_END));
+	Memory::StoreU8(address, val);
 }
 

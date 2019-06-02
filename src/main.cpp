@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "bootrom.h"
+#include "cartridge.h"
 #include "constants.h"
 #include "cpu.h"
 #include "main.h"
@@ -17,7 +18,7 @@ void ParseArgs(int argc, char** argv)
 		std::string arg = argv[i++];
 		if (arg == "-gamerom")
 		{
-			Memory::gamerom_path = argv[i++];
+			Cartridge::rom_path = argv[i++];
 		}
 	}
 }
@@ -40,7 +41,7 @@ int main(int argc, char** argv)
 
 	Memory::Init();
 	BootRom::LoadFromDisk();
-	Memory::LoadGameRom();
+	Cartridge::LoadGameRom();
 	PPU::Init();
 
 	int clock = 0;

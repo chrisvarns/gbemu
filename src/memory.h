@@ -8,7 +8,5 @@ namespace Memory
 	void StoreU8(u16 address, u8 val);
 
 	void Init();
-	void LoadGameRom();
-	extern std::string gamerom_path;
 };
 
