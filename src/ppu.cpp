@@ -226,6 +226,8 @@ u16 GetTileAddress()
 		s16 tile_address_offset = fetch_tile_number * TILE_SIZE_BYTES;
 		tile_address = u16(AddressRegion::TILE_PATTERN_TABLE_MODE_0_ELEMENT_0) + tile_address_offset;
 	}
+	auto row_in_tile = CurrentPixelLine() % 8;
+	tile_address += row_in_tile * 2;
 	return tile_address;
 }
 
@@ -239,26 +241,22 @@ void StepFetch()
 		{
 		case FETCH_STAGE::READ_TILE_NUMBER:
 		{
-			auto background_map_horizontal_index = (current_h_cycle - PIXEL_TRANSFER_START_CYCLE) / 8; // todo scroll x
-			auto background_map_vertical_index = CurrentPixelLine() / 8; // todo scroll y
-			auto tile_number_address_offset = background_map_vertical_index * BACKGROUND_MAP_NUM_TILE_X + background_map_horizontal_index;
-			u16 tile_number_address = fetch_source_address + tile_number_address_offset;
+			const auto background_map_horizontal_index = (current_h_cycle - PIXEL_TRANSFER_START_CYCLE) / 8; // todo scroll x
+			const auto background_map_vertical_index = CurrentPixelLine() / 8; // todo scroll y
+			const auto tile_number_address_offset = background_map_vertical_index * BACKGROUND_MAP_NUM_TILE_X + background_map_horizontal_index;
+			const u16 tile_number_address = fetch_source_address + tile_number_address_offset;
 			fetch_tile_number = Bus::LoadU8(tile_number_address);
 		}
 		break;
 		case FETCH_STAGE::READ_DATA_LSB:
 		{
-			s16 tile_address = GetTileAddress();
-			auto row_in_tile = CurrentPixelLine() % 8;
-			tile_address += row_in_tile * 2;
+			const s16 tile_address = GetTileAddress();
 			fetch_tile_data_low_bits = Bus::LoadU8(tile_address);
 		}
 		break;
 		case FETCH_STAGE::READ_DATA_MSB:
 		{
-			s16 tile_address = GetTileAddress();
-			auto row_in_tile = CurrentPixelLine() % 8;
-			tile_address += row_in_tile * 2;
+			const s16 tile_address = GetTileAddress();
 			fetch_tile_data_high_bits = Bus::LoadU8(tile_address + 1);
 			if (fifo_queue.size() > 8)
 			{
@@ -266,11 +264,12 @@ void StepFetch()
 				break;
 			}
 			// The fifo has space so we immediately push out.
-			// Pixel transfer takes minimum 43 1mhz cycles:
-			//		40 to push out the 160 pixels (1 per 4mhz cycle), and 3 due to delay populating the fifo
-			//		3 (12 4mhz cycles) for the fetch to populate the fifo initially.
-			// Note that the first 2 fetches are 12 4mhz cycles due to the fifo having space, but all subsequent fetches will be 16 4mhz cycles.
 			fetch_stage = FETCH_STAGE::WRITE_TO_FIFO;
+
+			// Pixel transfer takes minimum 43 1mhz cycles:
+			//		40 to push out the 160 pixels (1 per 4mhz cycle)
+			//		3 (12 4mhz cycles) for the fetch to populate the fifo before it can start writing out.
+			// Note that the first 2 fetches are 12 4mhz cycles due to the fifo having space, but all subsequent fetches will be 16 4mhz cycles.
 		}
 		// Intentional fallthrough
 		case FETCH_STAGE::WRITE_TO_FIFO:
