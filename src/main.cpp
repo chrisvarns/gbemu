@@ -52,7 +52,7 @@ int main(int argc, char** argv)
 			CPU::Step();
 		}
 		PPU::Step();
-		clock += 2;
+		clock++;
 	}
 	return 0;
 }
