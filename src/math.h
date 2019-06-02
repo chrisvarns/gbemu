@@ -29,6 +29,6 @@ namespace Math
 
 	// CB Prefix
 	void Bit(u8 reg, u8 bit);
-	void RotateLeft(u8& val);
+	void RotateLeftThroughCarry(u8& val);
 }
 

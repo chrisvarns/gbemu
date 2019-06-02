@@ -1475,32 +1475,32 @@ void ProcessOpcodeCB()
 	{
 	case Opcode_CB::RL_B:
 	{
-		Math::RotateLeft(reg.B);
+		Math::RotateLeftThroughCarry(reg.B);
 		break;
 	}
 	case Opcode_CB::RL_C:
 	{
-		Math::RotateLeft(reg.C);
+		Math::RotateLeftThroughCarry(reg.C);
 		break;
 	}
 	case Opcode_CB::RL_D:
 	{
-		Math::RotateLeft(reg.D);
+		Math::RotateLeftThroughCarry(reg.D);
 		break;
 	}
 	case Opcode_CB::RL_E:
 	{
-		Math::RotateLeft(reg.E);
+		Math::RotateLeftThroughCarry(reg.E);
 		break;
 	}
 	case Opcode_CB::RL_H:
 	{
-		Math::RotateLeft(reg.H);
+		Math::RotateLeftThroughCarry(reg.H);
 		break;
 	}
 	case Opcode_CB::RL_L:
 	{
-		Math::RotateLeft(reg.L);
+		Math::RotateLeftThroughCarry(reg.L);
 		break;
 	}
 	case Opcode_CB::RL_$HL:
@@ -1508,7 +1508,7 @@ void ProcessOpcodeCB()
 		instructions.push([]()
 		{
 			u8 val = Bus::LoadU8(reg.HL);
-			Math::RotateLeft(val);
+			Math::RotateLeftThroughCarry(val);
 			reg.temp.L = val;
 		});
 		instructions.push([]() { Bus::StoreU8(reg.HL, reg.temp.L); });
@@ -1516,7 +1516,7 @@ void ProcessOpcodeCB()
 	}
 	case Opcode_CB::RL_A:
 	{
-		Math::RotateLeft(reg.A);
+		Math::RotateLeftThroughCarry(reg.A);
 		break;
 	}
 	}

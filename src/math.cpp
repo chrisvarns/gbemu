@@ -213,10 +213,10 @@ namespace Math
 			c ? (u8)Flags::C : 0;
 	}
 
-	void RotateLeft(u8& val)
+	void RotateLeftThroughCarry(u8& val)
 	{
 		u8 result = val << 1;
-		result &= (reg.F & (u8)Flags::C) ? 0x1 : 0x0;
+		result |= (reg.F & (u8)Flags::C) ? 0x1 : 0x0;
 
 		bool z = !result;
 		bool n = false;
