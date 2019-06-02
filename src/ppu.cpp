@@ -215,7 +215,6 @@ bool IsTilePatternTableMode1()
 
 u16 GetTileAddress()
 {
-	auto tile_data_row_index = CurrentPixelLine() % 8; // todo scroll y? presumably yes
 	u16 tile_address;
 	if (IsTilePatternTableMode1())
 	{
