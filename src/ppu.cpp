@@ -149,7 +149,7 @@ void WritePixel(FifoPixel fifo_pixel)
 	*sdl_pixels_write++ = greyscale;
 	*sdl_pixels_write++ = 255;
 
-	//DEBUG
+#ifdef 0
 	auto write_offset = sdl_pixels_write - sdl_pixels;
 	PresentBackBuffer();
 	if (!sdl_texture_locked)
@@ -159,6 +159,7 @@ void WritePixel(FifoPixel fifo_pixel)
 		sdl_texture_locked = true;
 	}
 	sdl_pixels_write = sdl_pixels + write_offset;
+#endif // 0
  }
 
 void TriggerHBlank()
