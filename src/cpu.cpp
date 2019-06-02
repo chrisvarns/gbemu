@@ -800,7 +800,11 @@ void ProcessOpcode(Opcode opcode)
 	// 0x17 4
 	case Opcode::RLA:
 	{
-		Math::RotateLeftThroughCarry(reg.A);
+		// note : rotate is a free operation.
+		// note : rotate operations that are not exteded opcodes will always reset the zero flag
+		bool c = reg.A & 0x80;
+		reg.F = c ? (u8)Flags::C : 0;
+		reg.A = reg.A << 1;
 		break;
 	}
 
