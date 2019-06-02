@@ -14,7 +14,8 @@ namespace Bus
 
 inline u8 HandleIORead(u16 address)
 {
-	switch (SpecialRegister(address))
+	SpecialRegister special_register = SpecialRegister(address);
+	switch (special_register)
 	{
 	case SpecialRegister::SOUND_NR11:
 	case SpecialRegister::SOUND_NR12:
@@ -40,7 +41,8 @@ inline u8 HandleIORead(u16 address)
 
 inline void HandleIOWrite(u16 address, u8 val)
 {
-	switch ((SpecialRegister)address)
+	SpecialRegister special_register = SpecialRegister(address);
+	switch (special_register)
 	{
 	case SpecialRegister::SOUND_NR11:
 	case SpecialRegister::SOUND_NR12:
