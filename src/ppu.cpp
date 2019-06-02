@@ -128,7 +128,7 @@ void PPU::Init()
 void Disable()
 {
 	current_h_cycle = -1;
-	Bus::StoreU8((u16)SpecialRegister::VIDEO_CURRENT_SCANLINE, 0);
+	Bus::StoreU8_PPU((u16)SpecialRegister::VIDEO_CURRENT_SCANLINE, 0);
 
 	fifo_mode = FIFO_MODE::DISABLED;
 	fetch_mode = FETCH_MODE::DISABLED;
