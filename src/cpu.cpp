@@ -874,7 +874,7 @@ void ProcessOpcode(Opcode opcode)
 		conditionalActionTaken = (reg.F & (u8)Flags::Z) == 0;
 		if (conditionalActionTaken)
 		{
-			instructions.push([]() { reg.PC += s8(reg.temp.L); });	// todo : verify signed number casting is performing correct arithmetic
+			instructions.push([]() { reg.PC += s8(reg.temp.L); });
 		}
 		break;
 	}
