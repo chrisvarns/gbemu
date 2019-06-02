@@ -1,5 +1,6 @@
 #include "bootrom.h"
 #include "bus.h"
+#include "cartridge.h"
 #include "constants.h"
 #include "memory.h"
 #include "utils.h"
@@ -11,7 +12,7 @@ namespace Bus
 	void StoreU8_PPU(u16 address, u8 val);
 }
 
-u8 HandleIORead(u16 address)
+inline u8 HandleIORead(u16 address)
 {
 	switch (SpecialRegister(address))
 	{
@@ -37,7 +38,7 @@ u8 HandleIORead(u16 address)
 	return 0;
 }
 
-void HandleIOWrite(u16 address, u8 val)
+inline void HandleIOWrite(u16 address, u8 val)
 {
 	switch ((SpecialRegister)address)
 	{
@@ -75,7 +76,7 @@ u8 Bus::LoadU8(u16 address)
 		if (Memory::LoadU8((u16)SpecialRegister::BOOTROM_SWITCH))
 		{
 			// 16KB Cartridge ROM bank #0
-			return Memory::LoadU8(address);
+			return Cartridge::LoadU8(address);
 		}
 		else
 		{
@@ -86,17 +87,17 @@ u8 Bus::LoadU8(u16 address)
 	else if (InRange(address, AddressRegion::ROMBANK_STATIC_START, AddressRegion::ROMBANK_STATIC_END))
 	{
 		// 16KB Cartridge ROM bank #0
-		return Memory::LoadU8(address);
+		return Cartridge::LoadU8(address);
 	}
 	else if (InRange(address, AddressRegion::ROMBANK_SWITCHABLE_START, AddressRegion::ROMBANK_SWITCHABLE_END))
 	{
 		// 16KB Cartridge ROM bank (switchable via MBC, some titles)
-		return Memory::LoadU8(address);
+		return Cartridge::LoadU8(address);
 	}
 	else if (InRange(address, AddressRegion::VRAM_START, AddressRegion::VRAM_END))
 	{
 		// 8KB Video RAM
-		return Memory::LoadU8(address);
+		return Memory::LoadU8(address); // todo go through PPU
 	}
 	else if (InRange(address, AddressRegion::RAMBANK_SWITCHABLE_START, AddressRegion::RAMBANK_SWITCHABLE_END))
 	{
@@ -150,22 +151,7 @@ void Bus::StoreU8(u16 address, u8 val)
 	if (InRange(address, AddressRegion::SELECT_START, AddressRegion::SELECT_END))
 	{
 		// 32KB ROM space
-		if (InRange(address, AddressRegion::ROMBANK_STATIC_START, AddressRegion::ROMBANK_STATIC_END))
-		{
-			// TODO RAM Bank Enable
-		}
-		else if (InRange(address, AddressRegion::ROMBANK_SELECT_START, AddressRegion::ROMBANK_SELECT_END))
-		{
-			// TODO ROM Bank Select
-		}
-		else if (InRange(address, AddressRegion::RAMBANK_SELECT_START, AddressRegion::RAMBANK_SELECT_END))
-		{
-			// TODO RAM Bank Select
-		}
-		else if (InRange(address, AddressRegion::MBC1_SELECT_START, AddressRegion::MBC1_SELECT_END))
-		{
-			// TODO MBC1 ROM/RAM Select
-		}
+		Cartridge::StoreU8(address, val);
 	}
 	else if (InRange(address, AddressRegion::VRAM_START, AddressRegion::VRAM_END))
 	{

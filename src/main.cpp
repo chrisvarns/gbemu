@@ -42,6 +42,7 @@ int main(int argc, char** argv)
 	Memory::Init();
 	BootRom::LoadFromDisk();
 	Cartridge::LoadGameRom();
+
 	PPU::Init();
 
 	int clock = 0;
