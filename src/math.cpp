@@ -92,7 +92,7 @@ namespace Math
 
 		bool z = result == 0;
 		bool n = true;
-		bool h = a & 0x0F;
+		bool h = (a & 0x1F) == 0x10;
 		bool c = reg.F & (u8)Flags::C;
 
 		SET_FLAG_REG(z, n, h, c);
