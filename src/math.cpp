@@ -3,6 +3,13 @@
 #include "math.h"
 #include "cpu.h"
 
+#define SET_FLAG_REG(z, n, h, c)	\
+	reg.F =							\
+		(z ? (u8)Flags::Z : 0) |	\
+		(n ? (u8)Flags::N : 0) |	\
+		(h ? (u8)Flags::H : 0) |	\
+		(c ? (u8)Flags::C : 0)
+
 namespace Math
 {
 
@@ -15,11 +22,7 @@ namespace Math
 		bool h = ((a & 0x0F) + (b & 0x0F)) > 0x0F;
 		bool c = ((u16)a + (u16)b) > 0xFF;
 
-		reg.F =
-			z ? (u8)Flags::Z : 0 |
-			n ? (u8)Flags::N : 0 |
-			h ? (u8)Flags::H : 0 |
-			c ? (u8)Flags::C : 0;
+		SET_FLAG_REG(z, n, h, c);
 
 		return result;
 	}
@@ -36,11 +39,7 @@ namespace Math
 		bool h = ((a & 0x0F) + (b & 0x0F)) > 0x0F;
 		bool c = ((u16)a + (u16)b) > 0xFF;
 
-		reg.F =
-			z ? (u8)Flags::Z : 0 |
-			n ? (u8)Flags::N : 0 |
-			h ? (u8)Flags::H : 0 |
-			c ? (u8)Flags::C : 0;
+		SET_FLAG_REG(z, n, h, c);
 
 		return result;
 	}
@@ -54,11 +53,7 @@ namespace Math
 		bool h = ((s16)(reg.A & 0x0F)) < ((s16)(val & 0x0F));
 		bool c = ((s16)reg.A - (s16)val) < 0x00;
 
-		reg.F =
-			z ? (u8)Flags::Z : 0 |
-			n ? (u8)Flags::N : 0 |
-			h ? (u8)Flags::H : 0 |
-			c ? (u8)Flags::C : 0;
+		SET_FLAG_REG(z, n, h, c);
 
 		return result;
 	}
@@ -72,11 +67,7 @@ namespace Math
 		bool h = ((a & 0x0FFF) + (b & 0x0FFF)) > 0x0FFF;
 		bool c = ((u32)a + (u32)b) > 0xFFFF;
 
-		reg.F =
-			z ? (u8)Flags::Z : 0 |
-			n ? (u8)Flags::N : 0 |
-			h ? (u8)Flags::H : 0 |
-			c ? (u8)Flags::C : 0;
+		SET_FLAG_REG(z, n, h, c);
 
 		return result;
 	}
@@ -90,11 +81,7 @@ namespace Math
 		bool h = (a & 0x0F) == 0x0F;
 		bool c = reg.F & (u8)Flags::C;
 
-		reg.F =
-			z ? (u8)Flags::Z : 0 |
-			n ? (u8)Flags::N : 0 |
-			h ? (u8)Flags::H : 0 |
-			c ? (u8)Flags::C : 0;
+		SET_FLAG_REG(z, n, h, c);
 
 		a = result;
 	}
@@ -108,11 +95,7 @@ namespace Math
 		bool h = a & 0x0F;
 		bool c = reg.F & (u8)Flags::C;
 
-		reg.F =
-			z ? (u8)Flags::Z : 0 |
-			n ? (u8)Flags::N : 0 |
-			h ? (u8)Flags::H : 0 |
-			c ? (u8)Flags::C : 0;
+		SET_FLAG_REG(z, n, h, c);
 
 		a = result;
 	}
@@ -136,11 +119,7 @@ namespace Math
 		bool h = true;
 		bool c = false;
 
-		reg.F =
-			z ? (u8)Flags::Z : 0 |
-			n ? (u8)Flags::N : 0 |
-			h ? (u8)Flags::H : 0 |
-			c ? (u8)Flags::C : 0;
+		SET_FLAG_REG(z, n, h, c);
 
 		return result;
 	}
@@ -154,11 +133,7 @@ namespace Math
 		bool h = false;
 		bool c = false;
 
-		reg.F =
-			z ? (u8)Flags::Z : 0 |
-			n ? (u8)Flags::N : 0 |
-			h ? (u8)Flags::H : 0 |
-			c ? (u8)Flags::C : 0;
+		SET_FLAG_REG(z, n, h, c);
 
 		return result;
 	}
@@ -172,11 +147,7 @@ namespace Math
 		bool h = false;
 		bool c = false;
 
-		reg.F =
-			z ? (u8)Flags::Z : 0 |
-			n ? (u8)Flags::N : 0 |
-			h ? (u8)Flags::H : 0 |
-			c ? (u8)Flags::C : 0;
+		SET_FLAG_REG(z, n, h, c);
 	}
 
 	void Compare(u8 val)
@@ -188,11 +159,7 @@ namespace Math
 		bool h = ((s16)(reg.A & 0x0F)) < ((s16)(val & 0x0F));
 		bool c = ((s16)reg.A - (s16)val) < 0x00;
 
-		reg.F =
-			z ? (u8)Flags::Z : 0 |
-			n ? (u8)Flags::N : 0 |
-			h ? (u8)Flags::H : 0 |
-			c ? (u8)Flags::C : 0;
+		SET_FLAG_REG(z, n, h, c);
 	}
 
 	void Bit(u8 val, u8 bit)
@@ -206,11 +173,7 @@ namespace Math
 		bool h = true;
 		bool c = reg.F & (u8)Flags::C;
 
-		reg.F =
-			z ? (u8)Flags::Z : 0 |
-			n ? (u8)Flags::N : 0 |
-			h ? (u8)Flags::H : 0 |
-			c ? (u8)Flags::C : 0;
+		SET_FLAG_REG(z, n, h, c);
 	}
 
 	void RotateLeftThroughCarry(u8& val)
@@ -223,11 +186,7 @@ namespace Math
 		bool h = false;
 		bool c = val >> 7;
 
-		reg.F =
-			z ? (u8)Flags::Z : 0 |
-			n ? (u8)Flags::N : 0 |
-			h ? (u8)Flags::H : 0 |
-			c ? (u8)Flags::C : 0;
+		SET_FLAG_REG(z, n, h, c);
 
 		val = result;
 	}
