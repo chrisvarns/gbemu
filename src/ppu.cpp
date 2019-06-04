@@ -151,6 +151,20 @@ void WritePixel(FifoPixel fifo_pixel)
 	*sdl_pixels_write++ = 255;
 
 #if 0
+	// Crosshair rendering, useful for isolating problem pixels
+	// todo remove when we have hover-over pixel location
+	const int x_coord = 104;
+	const int y_coord = 71;
+	if (GetCurrentLineIdx() == y_coord || fifo_pixels_written_out == x_coord)
+	{
+		*(sdl_pixels_write - 4) = 255;
+		*(sdl_pixels_write - 3) = 0;
+		*(sdl_pixels_write - 2) = 0;
+	}
+#endif
+
+#if 0
+	// Immediately present every pixel (useful when stepping)
 	auto write_offset = sdl_pixels_write - sdl_pixels;
 	PresentBackBuffer();
 	if (!sdl_texture_locked)
