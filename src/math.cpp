@@ -176,19 +176,86 @@ namespace Math
 		SET_FLAG_REG(z, n, h, c);
 	}
 
-	void RotateLeftThroughCarry(u8& val)
+	void RotateLeft(u8& val)
 	{
+		bool carry = val & 0x80;
 		u8 result = val << 1;
-		result |= (reg.F & (u8)Flags::C) ? 0x1 : 0x0;
+		result |= carry ? 0x1 : 0x0;
 
-		bool z = !result;
+		bool z = false;
 		bool n = false;
 		bool h = false;
-		bool c = val >> 7;
+		bool c = carry;
 
 		SET_FLAG_REG(z, n, h, c);
 
 		val = result;
+	}
+
+	void RotateRight(u8& val)
+	{
+		bool carry = val & 0x01;
+		u8 result = val >> 1;
+		result |= carry ? 0x80 : 0x0;
+
+		bool z = false;
+		bool n = false;
+		bool h = false;
+		bool c = carry;
+
+		SET_FLAG_REG(z, n, h, c);
+
+		val = result;
+	}
+
+	inline void RotateLeftThroughCarry_Internal(u8& val, bool set_z)
+	{
+		u8 result = val << 1;
+		result |= (reg.F & (u8)Flags::C) ? 0x1 : 0x0;
+
+		bool z = set_z && !result;
+		bool n = false;
+		bool h = false;
+		bool c = val & 0x80;
+
+		SET_FLAG_REG(z, n, h, c);
+
+		val = result;
+	}
+
+	inline void RotateRightThroughCarry_Internal(u8& val, bool set_z)
+	{
+		u8 result = val >> 1;
+		result |= (reg.F & (u8)Flags::C) ? 0x80 : 0x0;
+
+		bool z = set_z && !result;
+		bool n = false;
+		bool h = false;
+		bool c = val & 0x01;
+
+		SET_FLAG_REG(z, n, h, c);
+
+		val = result;
+	}
+
+	void RotateLeftThroughCarry(u8& val)
+	{
+		RotateLeftThroughCarry_Internal(val, false);
+	}
+
+	void RotateLeftThroughCarry_CB(u8& val)
+	{
+		RotateLeftThroughCarry_Internal(val, true);
+	}
+
+	void RotateRightThroughCarry(u8& val)
+	{
+		RotateRightThroughCarry_Internal(val, false);
+	}
+
+	void RotateRightThroughCarry_CB(u8& val)
+	{
+		RotateRightThroughCarry_Internal(val, true);
 	}
 		
 }

@@ -27,8 +27,14 @@ namespace Math
 
 	void Compare(u8 val);
 
+	void RotateLeft(u8& val);
+	void RotateRight(u8& val);
+	void RotateLeftThroughCarry(u8& val);
+	void RotateRightThroughCarry(u8& val);
+
 	// CB Prefix
 	void Bit(u8 reg, u8 bit);
-	void RotateLeftThroughCarry(u8& val);
+	void RotateLeftThroughCarry_CB(u8& val);
+	void RotateRightThroughCarry_CB(u8& val);
 }
 

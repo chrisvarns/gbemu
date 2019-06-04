@@ -669,11 +669,7 @@ void ProcessOpcode(Opcode opcode)
 	// 0x07 4
 	case Opcode::RLCA:			
 	{
-		// note : rotate is a free operation.
-		// note : rotate operations that are not exteded opcodes will always reset the zero flag
-		bool c = reg.A & 0x80;
-		reg.F = c ? (u8)Flags::C : 0;
-		reg.A = (reg.A << 1) | (c ? u8(1) : u8(0));
+		Math::RotateLeft(reg.A);
 		break;
 	}
 
@@ -733,11 +729,7 @@ void ProcessOpcode(Opcode opcode)
 	// 0x0F 4
 	case Opcode::RRCA:
 	{
-		// note : rotate is a free operation.
-		// note : rotate operations that are not exteded opcodes will always reset the zero flag
-		bool c = reg.A & 0x01;
-		reg.F = c ? (u8)Flags::C : 0;
-		reg.A = (reg.A >> 1) | (c ? u8(0x80) : u8(0));
+		Math::RotateRight(reg.A);
 		break;
 	}
 
@@ -800,11 +792,7 @@ void ProcessOpcode(Opcode opcode)
 	// 0x17 4
 	case Opcode::RLA:
 	{
-		// note : rotate is a free operation.
-		// note : rotate operations that are not exteded opcodes will always reset the zero flag
-		bool c = reg.A & 0x80;
-		reg.F = c ? (u8)Flags::C : 0;
-		reg.A = reg.A << 1;
+		Math::RotateLeftThroughCarry(reg.A);
 		break;
 	}
 
@@ -862,11 +850,7 @@ void ProcessOpcode(Opcode opcode)
 	// 0x1F 4
 	case Opcode::RRA:
 	{
-		// note : rotate is a free operation.
-		// note : rotate operations that are not exteded opcodes will always reset the zero flag
-		bool c = reg.A & 0x01;
-		reg.F = c ? (u8)Flags::C : 0;
-		reg.A = reg.A >> 1;
+		Math::RotateRightThroughCarry(reg.A);
 		break;
 	}
 	}
@@ -1475,32 +1459,32 @@ void ProcessOpcodeCB()
 	{
 	case Opcode_CB::RL_B:
 	{
-		Math::RotateLeftThroughCarry(reg.B);
+		Math::RotateLeftThroughCarry_CB(reg.B);
 		break;
 	}
 	case Opcode_CB::RL_C:
 	{
-		Math::RotateLeftThroughCarry(reg.C);
+		Math::RotateLeftThroughCarry_CB(reg.C);
 		break;
 	}
 	case Opcode_CB::RL_D:
 	{
-		Math::RotateLeftThroughCarry(reg.D);
+		Math::RotateLeftThroughCarry_CB(reg.D);
 		break;
 	}
 	case Opcode_CB::RL_E:
 	{
-		Math::RotateLeftThroughCarry(reg.E);
+		Math::RotateLeftThroughCarry_CB(reg.E);
 		break;
 	}
 	case Opcode_CB::RL_H:
 	{
-		Math::RotateLeftThroughCarry(reg.H);
+		Math::RotateLeftThroughCarry_CB(reg.H);
 		break;
 	}
 	case Opcode_CB::RL_L:
 	{
-		Math::RotateLeftThroughCarry(reg.L);
+		Math::RotateLeftThroughCarry_CB(reg.L);
 		break;
 	}
 	case Opcode_CB::RL_$HL:
@@ -1508,7 +1492,7 @@ void ProcessOpcodeCB()
 		instructions.push([]()
 		{
 			u8 val = Bus::LoadU8(reg.HL);
-			Math::RotateLeftThroughCarry(val);
+			Math::RotateLeftThroughCarry_CB(val);
 			reg.temp.L = val;
 		});
 		instructions.push([]() { Bus::StoreU8(reg.HL, reg.temp.L); });
@@ -1516,7 +1500,7 @@ void ProcessOpcodeCB()
 	}
 	case Opcode_CB::RL_A:
 	{
-		Math::RotateLeftThroughCarry(reg.A);
+		Math::RotateLeftThroughCarry_CB(reg.A);
 		break;
 	}
 	}
