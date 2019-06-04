@@ -84,6 +84,7 @@ static u16 fetch_source_address;
 static u8 fetch_tile_number;
 static u8 fetch_tile_data_low_bits;
 static u8 fetch_tile_data_high_bits;
+static u8 fetch_fetched_bg_tiles = 0;
 
 static SDL_Renderer* sdl_renderer = nullptr;
 static SDL_Texture* sdl_texture = nullptr;
@@ -136,6 +137,12 @@ void Disable()
 	fifo_queue = {};
 
 	ClearToWhite();
+}
+
+int GetCurrentLineIdx()
+{
+	u8 scanline_reg = Bus::LoadU8((u16)SpecialRegister::VIDEO_CURRENT_SCANLINE);
+	return scanline_reg;
 }
 
 void WritePixel(FifoPixel fifo_pixel)
@@ -215,12 +222,6 @@ void StepFifo()
 	}
 }
 
-int CurrentPixelLine()
-{
-	u8 scanline_reg = Bus::LoadU8((u16)SpecialRegister::VIDEO_CURRENT_SCANLINE);
-	return scanline_reg;
-}
-
 bool IsTilePatternTableMode1()
 {
 	u8 lcd_control_reg = Bus::LoadU8((u16)SpecialRegister::VIDEO_LCD_CONTROL);
@@ -241,7 +242,7 @@ u16 GetTileAddress()
 		s16 tile_address_offset = fetch_tile_number * TILE_SIZE_BYTES;
 		tile_address = u16(AddressRegion::TILE_PATTERN_TABLE_MODE_0_ELEMENT_0) + tile_address_offset;
 	}
-	auto row_in_tile = CurrentPixelLine() % 8;
+	auto row_in_tile = GetCurrentLineIdx() % 8;
 	tile_address += row_in_tile * 2;
 	return tile_address;
 }
@@ -256,8 +257,17 @@ void StepFetch()
 		{
 		case FETCH_STAGE::READ_TILE_NUMBER:
 		{
-			const auto background_map_horizontal_index = (current_h_cycle - PIXEL_TRANSFER_START_CYCLE) / 8; // todo scroll x
-			const auto background_map_vertical_index = CurrentPixelLine() / 8; // todo scroll y
+#if 0
+			// Break on the tile for a certain pixel being fetched
+			const int pixel_x = 104;
+			const int pixel_y = 71;
+			if (GetCurrentLineIdx() == pixel_y && (pixel_x / 8) == fetch_fetched_bg_tiles)
+			{
+				fetch_fetched_bg_tiles = fetch_fetched_bg_tiles;
+			}
+#endif
+			const auto background_map_horizontal_index = fetch_fetched_bg_tiles++; // todo scroll x
+			const auto background_map_vertical_index = GetCurrentLineIdx() / 8; // todo scroll y
 			const auto tile_number_address_offset = background_map_vertical_index * BACKGROUND_MAP_NUM_TILE_X + background_map_horizontal_index;
 			const u16 tile_number_address = fetch_source_address + tile_number_address_offset;
 			fetch_tile_number = Bus::LoadU8(tile_number_address);
@@ -330,6 +340,7 @@ void StartPixelTransfer()
 	fifo_mode = FIFO_MODE::ENABLED;
 
 	fetch_source_address = GetBackgroundMapStartAddr();
+	fetch_fetched_bg_tiles = 0;
 	fetch_stage = (FETCH_STAGE)0;
 	fetch_mode = FETCH_MODE::BACKGROUND;
 }
