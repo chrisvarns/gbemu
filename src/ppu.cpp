@@ -67,8 +67,9 @@ const int PIXEL_TRANSFER_START_CYCLE = 20 * 4;
 const int VBLANK_START_LINE = 144;
 const int NUM_LINES_TOTAL = 154;
 const int NUM_LINE_CYCLES = 114 * 4;
-const int BACKGROUND_MAP_NUM_TILE_X = 32;
-const int BACKGROUND_MAP_NUM_TILE_Y = 32;
+const int BACKGROUND_MAP_NUM_TILES_XY = 32;
+const int BACKGROUND_MAP_TILE_NUM_PIXELS_XY = 8;
+const int BACKGROUND_MAP_NUM_PIXELS_XY = BACKGROUND_MAP_NUM_TILES_XY * BACKGROUND_MAP_TILE_NUM_PIXELS_XY;
 const int TILE_SIZE_BYTES = 16;
 
 static PPU_STAGE ppu_stage = PPU_STAGE::DISABLED;
@@ -77,6 +78,7 @@ static int current_h_cycle = -1;
 static FIFO_MODE fifo_mode = FIFO_MODE::DISABLED;
 static std::queue<FifoPixel> fifo_queue;
 static u8 fifo_pixels_written_out = 0;
+static u8 fifo_pixels_to_discard = 0;
 
 static FETCH_MODE fetch_mode = FETCH_MODE::DISABLED;
 static FETCH_STAGE fetch_stage = (FETCH_STAGE)0;
@@ -120,7 +122,7 @@ void ClearToWhite()
 
 void PPU::Init()
 {
-	sdl_renderer = SDL_CreateRenderer(g_window, -1, 0);
+	sdl_renderer = SDL_CreateRenderer(g_window, -1, SDL_RENDERER_PRESENTVSYNC);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 0);
 	sdl_texture = SDL_CreateTexture(sdl_renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, 160, 144);
 
@@ -142,7 +144,8 @@ void Disable()
 int GetCurrentLineIdx()
 {
 	u8 scanline_reg = Bus::LoadU8((u16)SpecialRegister::VIDEO_CURRENT_SCANLINE);
-	return scanline_reg;
+	u8 scroll_y = Bus::LoadU8((u16)SpecialRegister::VIDEO_SCROLLY);
+	return (scanline_reg + scroll_y) % BACKGROUND_MAP_NUM_PIXELS_XY;
 }
 
 void WritePixel(FifoPixel fifo_pixel)
@@ -213,11 +216,18 @@ void StepFifo()
 		auto pixel = fifo_queue.front();
 		fifo_queue.pop();
 
-		WritePixel(pixel);
-		fifo_pixels_written_out++;
-		if (fifo_pixels_written_out == DISPLAY_WIDTH)
+		if (fifo_pixels_to_discard > 0)
 		{
-			TriggerHBlank();
+			fifo_pixels_to_discard--;
+		}
+		else
+		{
+			WritePixel(pixel);
+			fifo_pixels_written_out++;
+			if (fifo_pixels_written_out == DISPLAY_WIDTH)
+			{
+				TriggerHBlank();
+			}
 		}
 	}
 }
@@ -261,14 +271,16 @@ void StepFetch()
 			// Break on the tile for a certain pixel being fetched
 			const int pixel_x = 104;
 			const int pixel_y = 71;
-			if (GetCurrentLineIdx() == pixel_y && (pixel_x / 8) == fetch_fetched_bg_tiles)
+			const u8 scroll_y = Bus::LoadU8((u16)SpecialRegister::VIDEO_SCROLLY);
+			if (GetCurrentLineIdx() == (pixel_y + scroll_y) && (pixel_x / 8) == fetch_fetched_bg_tiles)
 			{
 				fetch_fetched_bg_tiles = fetch_fetched_bg_tiles;
 			}
 #endif
-			const auto background_map_horizontal_index = fetch_fetched_bg_tiles++; // todo scroll x
-			const auto background_map_vertical_index = GetCurrentLineIdx() / 8; // todo scroll y
-			const auto tile_number_address_offset = background_map_vertical_index * BACKGROUND_MAP_NUM_TILE_X + background_map_horizontal_index;
+			const u8 scroll_x = Bus::LoadU8((u16)SpecialRegister::VIDEO_SCROLLX);
+			const auto background_map_horizontal_index = (scroll_x / BACKGROUND_MAP_TILE_NUM_PIXELS_XY + fetch_fetched_bg_tiles++) % BACKGROUND_MAP_NUM_TILES_XY;
+			const auto background_map_vertical_index = GetCurrentLineIdx() / 8;
+			const auto tile_number_address_offset = background_map_vertical_index * BACKGROUND_MAP_NUM_TILES_XY + background_map_horizontal_index;
 			const u16 tile_number_address = fetch_source_address + tile_number_address_offset;
 			fetch_tile_number = Bus::LoadU8(tile_number_address);
 		}
@@ -335,6 +347,9 @@ void StartPixelTransfer()
 {
 	ppu_stage = PPU_STAGE::PIXEL_TRANSFER;
 
+	u8 scroll_x = Bus::LoadU8((u16)SpecialRegister::VIDEO_SCROLLX);
+
+	fifo_pixels_to_discard = scroll_x % BACKGROUND_MAP_TILE_NUM_PIXELS_XY;
 	fifo_pixels_written_out = 0;
 	fifo_queue = {};
 	fifo_mode = FIFO_MODE::ENABLED;
