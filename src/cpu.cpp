@@ -1050,7 +1050,7 @@ void ProcessOpcode(Opcode opcode)
 	{
 	case Opcode::SUB_B:
 	{
-		Math::Sub(reg.B);
+		Math::SubFromA(reg.B);
 		break;
 	}
 	}

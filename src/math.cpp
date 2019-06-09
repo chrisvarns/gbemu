@@ -44,7 +44,7 @@ namespace Math
 		return result;
 	}
 
-	u8 Sub(u8 val)
+	void SubFromA(u8 val)
 	{
 		u8 result = reg.A - val;
 
@@ -55,7 +55,7 @@ namespace Math
 
 		SET_FLAG_REG(z, n, h, c);
 
-		return result;
+		reg.A = result;
 	}
 
 	u16 Add(u16 a, u16 b)

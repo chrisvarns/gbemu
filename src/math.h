@@ -13,8 +13,9 @@ namespace Math
 {
 	u8 Add(u8 a, u8 b);
 	u8 AddWithCarry(u8 a, u8 b);
-	u8 Sub(u8 val);
 	u16 Add(u16 a, u16 b);
+
+	void SubFromA(u8 val);
 
 	void Inc(u8& a);
 	void Dec(u8& a);
