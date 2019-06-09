@@ -50,7 +50,7 @@ namespace Math
 
 		bool z = result == 0;
 		bool n = true;
-		bool h = ((s16)(reg.A & 0x0F)) < ((s16)(val & 0x0F));
+		bool h = ((s16)(reg.A & 0x0F)) >= ((s16)(val & 0x0F)); // Set if no borrow from bit 4
 		bool c = ((s16)reg.A - (s16)val) < 0x00;
 
 		SET_FLAG_REG(z, n, h, c);
