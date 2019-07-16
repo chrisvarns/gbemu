@@ -1493,61 +1493,122 @@ void ProcessOpcode(Opcode opcode)
 		}
 	}
 
-	// 0x70
+	// Group 0x70
 	{
-	case Opcode::LD_$HL_A:		// 8
-	{
-		instructions.push([]() { Bus::StoreU8(reg.HL, reg.A); });
-		break;
+		// 0x70
+		case Opcode::LD_$HL_B:		// 8
+		{
+			instructions.push([]() { Bus::StoreU8(reg.HL, reg.B); });
+			break;
+		}
+
+		// 0x71
+		case Opcode::LD_$HL_C:		// 8
+		{
+			instructions.push([]() { Bus::StoreU8(reg.HL, reg.C); });
+			break;
+		}
+
+		// 0x72
+		case Opcode::LD_$HL_D:		// 8
+		{
+			instructions.push([]() { Bus::StoreU8(reg.HL, reg.D); });
+			break;
+		}
+
+		// 0x73
+		case Opcode::LD_$HL_E:		// 8
+		{
+			instructions.push([]() { Bus::StoreU8(reg.HL, reg.E); });
+			break;
+		}
+
+		// 0x74
+		case Opcode::LD_$HL_H:		// 8
+		{
+			instructions.push([]() { Bus::StoreU8(reg.HL, reg.H); });
+			break;
+		}
+
+		// 0x75
+		case Opcode::LD_$HL_L:		// 8
+		{
+			instructions.push([]() { Bus::StoreU8(reg.HL, reg.L); });
+			break;
+		}
+
+		// 0x76
+		case Opcode::HALT:			// 4
+		{
+			assert(false && "Opcode 0x76 HALT not yet implemented");	// todo : implement this opcode
+			break;
+		}
+
+		// 0x77
+		case Opcode::LD_$HL_A:		// 8
+		{
+			instructions.push([]() { Bus::StoreU8(reg.HL, reg.A); });
+			break;
+		}
+
+		// 0x78
+		case Opcode::LD_A_B:		// 4
+		{
+			reg.A = reg.B;
+			break;
+		}
+
+		// 0x79
+		case Opcode::LD_A_C:		// 4
+		{
+			reg.A = reg.C;
+			break;
+		}
+
+		// 0x7A
+		case Opcode::LD_A_D:		// 4
+		{
+			reg.A = reg.D;
+			break;
+		}
+
+		// 0x7B
+		case Opcode::LD_A_E:		// 4
+		{
+			reg.A = reg.E;
+			break;
+		}
+
+		// 0x7C
+		case Opcode::LD_A_H:		// 4
+		{
+			reg.A = reg.H;
+			break;
+		}
+
+		// 0x7D
+		case Opcode::LD_A_L:		// 4
+		{
+			reg.A = reg.L;
+			break;
+		}
+
+		// 0x7E
+		case Opcode::LD_A_$HL:		// 8
+		{
+			instructions.push([]() { reg.A = Bus::LoadU8(reg.HL); });
+			break;
+		}
+
+		// 0x7F
+		case Opcode::LD_A_A:		// 4
+		{
+			// note : move between registers is a free operation.
+			reg.A = reg.A;
+			break;
+		}
 	}
-	case Opcode::LD_A_B:		// 4
-	{
-		// note : move between registers is a free operation.
-		reg.A = reg.B;
-		break;
-	}
-	case Opcode::LD_A_C:		// 4
-	{
-		// note : move between registers is a free operation.
-		reg.A = reg.C;
-		break;
-	}
-	case Opcode::LD_A_D:		// 4
-	{
-		// note : move between registers is a free operation.
-		reg.A = reg.D;
-		break;
-	}
-	case Opcode::LD_A_E:		// 4
-	{
-		// note : move between registers is a free operation.
-		reg.A = reg.E;
-		break;
-	}
-	case Opcode::LD_A_H:		// 4
-	{
-		// note : move between registers is a free operation.
-		reg.A = reg.H;
-		break;
-	}
-	case Opcode::LD_A_L:		// 4
-	{
-		// note : move between registers is a free operation.
-		reg.A = reg.L;
-		break;
-	}
-	case Opcode::LD_A_$HL:		// 8
-	{
-		instructions.push([]() { reg.A = Bus::LoadU8(reg.HL); });
-		break;
-	}
-	case Opcode::LD_A_A:		// 4
-	{
-		// note : move between registers is a free operation.
-		reg.A = reg.A;
-		break;
-	}
-	}
+
 	// 0x80
 	{
 	case Opcode::ADD_A_$HL:
