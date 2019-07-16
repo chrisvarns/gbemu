@@ -1155,12 +1155,116 @@ void ProcessOpcode(Opcode opcode)
 
 	// Group 0x40
 	{
-	case Opcode::LD_C_A:		// 4
-	{
-		// note : move between registers is a free operation.
-		reg.C = reg.A;
-		break;
-	}
+		// 0x40
+		case Opcode::LD_B_B:		// 4
+		{
+			// effectivly a noop.
+			break;
+		}
+
+		// 0x41
+		case Opcode::LD_B_C:		// 4
+		{
+			reg.B = reg.C;
+			break;
+		}
+
+		// 0x42
+		case Opcode::LD_B_D:		// 4
+		{
+			reg.B = reg.D;
+			break;
+		}
+
+		// 0x43
+		case Opcode::LD_B_E:		// 4
+		{
+			reg.B = reg.E;
+			break;
+		}
+
+		// 0x44
+		case Opcode::LD_B_H:		// 4
+		{
+			reg.B = reg.H;
+			break;
+		}
+
+		// 0x45
+		case Opcode::LD_B_L:		// 4
+		{
+			reg.B = reg.L;
+			break;
+		}
+
+		// 0x46
+		case Opcode::LD_B_$HL:		// 8
+		{
+			instructions.push([]() { reg.B = Bus::LoadU8(reg.HL); });
+			break;
+		}
+
+		// 0x47
+		case Opcode::LD_B_A:		// 4
+		{
+			reg.B = reg.A;
+			break;
+		}
+
+		// 0x48
+		case Opcode::LD_C_B:		// 4
+		{
+			reg.C = reg.B;
+			break;
+		}
+
+		// 0x49
+		case Opcode::LD_C_C:		// 4
+		{
+			break;
+		}
+
+		// 0x4A
+		case Opcode::LD_C_D:		// 4
+		{
+			reg.C = reg.D;
+			break;
+		}
+
+		// 0x4B
+		case Opcode::LD_C_E:		// 4
+		{
+			reg.C = reg.E;
+			break;
+		}
+
+		// 0x4C
+		case Opcode::LD_C_H:		// 4
+		{
+			reg.C = reg.H;
+			break;
+		}
+
+		// 0x4D
+		case Opcode::LD_C_L:		// 4
+		{
+			reg.C = reg.L;
+			break;
+		}
+
+		// 0x4E
+		case Opcode::LD_C_$HL:		// 8
+		{
+			instructions.push([]() { reg.C = Bus::LoadU8(reg.HL); });
+			break;
+		}
+
+		// 0x4F
+		case Opcode::LD_C_A:		// 4
+		{
+			reg.C = reg.A;
+			break;
+		}
 	}
 	// 0x50
 	{
