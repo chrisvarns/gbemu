@@ -1266,14 +1266,120 @@ void ProcessOpcode(Opcode opcode)
 			break;
 		}
 	}
-	// 0x50
+
+	// Group 0x50
 	{
-	case Opcode::LD_D_A:
-	{
-		reg.D = reg.A;
-		break;
+		// 0x50
+		case Opcode::LD_D_B:		// 4
+		{
+			reg.D = reg.B;
+			break;
+		}
+
+		// 0x51
+		case Opcode::LD_D_C:		// 4
+		{
+			reg.D = reg.C;
+			break;
+		}
+
+		// 0x52
+		case Opcode::LD_D_D:		// 4
+		{
+			break;
+		}
+
+		// 0x53
+		case Opcode::LD_D_E:		// 4
+		{
+			reg.D = reg.E;
+			break;
+		}
+
+		// 0x54
+		case Opcode::LD_D_H:		// 4
+		{
+			reg.D = reg.H;
+			break;
+		}
+
+		// 0x55
+		case Opcode::LD_D_L:		// 4
+		{
+			reg.D = reg.L;
+			break;
+		}
+
+		// 0x56
+		case Opcode::LD_D_$HL:		// 8
+		{
+			instructions.push([]() { reg.D = Bus::LoadU8(reg.HL); });
+			break;
+		}
+
+		// 0x57
+		case Opcode::LD_D_A:
+		{
+			reg.D = reg.A;
+			break;
+		}
+
+		// 0x58
+		case Opcode::LD_E_B:
+		{
+			reg.E = reg.B;
+			break;
+		}
+
+		// 0x59
+		case Opcode::LD_E_C:
+		{
+			reg.E = reg.C;
+			break;
+		}
+
+		// 0x5A
+		case Opcode::LD_E_D:
+		{
+			reg.E = reg.D;
+			break;
+		}
+
+		// 0x5B
+		case Opcode::LD_E_E:
+		{
+			break;
+		}
+
+		// 0x5C
+		case Opcode::LD_E_H:
+		{
+			reg.E = reg.H;
+			break;
+		}
+
+		// 0x5D
+		case Opcode::LD_E_L:
+		{
+			reg.E = reg.L;
+			break;
+		}
+
+		// 0x5E
+		case Opcode::LD_E_$HL:
+		{
+			instructions.push([]() { reg.E = Bus::LoadU8(reg.HL); });
+			break;
+		}
+
+		// 0x5F
+		case Opcode::LD_E_A:
+		{
+			reg.E = reg.A;
+			break;
+		}
 	}
-	}
+
 	// 0x60
 	{
 	case Opcode::LD_H_A:
