@@ -1318,76 +1318,181 @@ void ProcessOpcode(Opcode opcode)
 		}
 
 		// 0x57
-		case Opcode::LD_D_A:
+		case Opcode::LD_D_A:		// 4
 		{
 			reg.D = reg.A;
 			break;
 		}
 
 		// 0x58
-		case Opcode::LD_E_B:
+		case Opcode::LD_E_B:		// 4
 		{
 			reg.E = reg.B;
 			break;
 		}
 
 		// 0x59
-		case Opcode::LD_E_C:
+		case Opcode::LD_E_C:		// 4
 		{
 			reg.E = reg.C;
 			break;
 		}
 
 		// 0x5A
-		case Opcode::LD_E_D:
+		case Opcode::LD_E_D:		// 4
 		{
 			reg.E = reg.D;
 			break;
 		}
 
 		// 0x5B
-		case Opcode::LD_E_E:
+		case Opcode::LD_E_E:		// 4
 		{
 			break;
 		}
 
 		// 0x5C
-		case Opcode::LD_E_H:
+		case Opcode::LD_E_H:		// 4
 		{
 			reg.E = reg.H;
 			break;
 		}
 
 		// 0x5D
-		case Opcode::LD_E_L:
+		case Opcode::LD_E_L:		// 4
 		{
 			reg.E = reg.L;
 			break;
 		}
 
 		// 0x5E
-		case Opcode::LD_E_$HL:
+		case Opcode::LD_E_$HL:		// 8
 		{
 			instructions.push([]() { reg.E = Bus::LoadU8(reg.HL); });
 			break;
 		}
 
 		// 0x5F
-		case Opcode::LD_E_A:
+		case Opcode::LD_E_A:		// 4
 		{
 			reg.E = reg.A;
 			break;
 		}
 	}
 
-	// 0x60
+	// Group 0x60
 	{
-	case Opcode::LD_H_A:
-	{
-		reg.H = reg.A;
-		break;
+		// 0x60
+		case Opcode::LD_H_B:		// 4
+		{
+			reg.H = reg.B;
+			break;
+		}
+
+		// 0x61
+		case Opcode::LD_H_C:		// 4
+		{
+			reg.H = reg.C;
+			break;
+		}
+
+		// 0x62
+		case Opcode::LD_H_D:		// 4
+		{
+			reg.H = reg.D;
+			break;
+		}
+
+		// 0x63
+		case Opcode::LD_H_E:		// 4
+		{
+			reg.H = reg.E;
+			break;
+		}
+
+		// 0x64
+		case Opcode::LD_H_H:		// 4
+		{
+			break;
+		}
+
+		// 0x65
+		case Opcode::LD_H_L:		// 4
+		{
+			reg.H = reg.L;
+			break;
+		}
+
+		// 0x66
+		case Opcode::LD_H_$HL:		// 8
+		{
+			instructions.push([]() { reg.H = Bus::LoadU8(reg.HL); });
+			break;
+		}
+
+		// 0x67
+		case Opcode::LD_H_A:		// 4
+		{
+			reg.H = reg.A;
+			break;
+		}
+
+		// 0x68
+		case Opcode::LD_L_B:		// 4
+		{
+			reg.L = reg.B;
+			break;
+		}
+
+		// 0x69
+		case Opcode::LD_L_C:		// 4
+		{
+			reg.L = reg.C;
+			break;
+		}
+
+		// 0x6A
+		case Opcode::LD_L_D:		// 4
+		{
+			reg.L = reg.D;
+			break;
+		}
+
+		// 0x6B
+		case Opcode::LD_L_E:		// 4
+		{
+			reg.L = reg.E;
+			break;
+		}
+
+		// 0x6C
+		case Opcode::LD_L_H:		// 4
+		{
+			reg.L = reg.H;
+			break;
+		}
+
+		// 0x6D
+		case Opcode::LD_L_L:		// 4
+		{
+			break;
+		}
+
+		// 0x6E
+		case Opcode::LD_L_$HL:		// 8
+		{
+			instructions.push([]() { reg.L = Bus::LoadU8(reg.HL); });
+			break;
+		}
+
+		// 0x6F
+		case Opcode::LD_L_A:		// 4
+		{
+			reg.L = reg.A;
+			break;
+		}
 	}
-	}
+
 	// 0x70
 	{
 	case Opcode::LD_$HL_A:		// 8
