@@ -1609,14 +1609,121 @@ void ProcessOpcode(Opcode opcode)
 		}
 	}
 
-	// 0x80
+	// Group 0x80
 	{
-	case Opcode::ADD_A_$HL:
-	{
-		instructions.push([]() { reg.A = Math::Add(reg.A, Bus::LoadU8(reg.HL)); });
-		break;
+		// 0x80
+		case Opcode::ADD_A_B:		// 4
+		{
+			reg.A = Math::Add(reg.A, reg.B);
+			break;
+		}
+
+		// 0x81
+		case Opcode::ADD_A_C:		// 4
+		{
+			reg.A = Math::Add(reg.A, reg.C);
+			break;
+		}
+
+		// 0x82
+		case Opcode::ADD_A_D:		// 4
+		{
+			reg.A = Math::Add(reg.A, reg.D);
+			break;
+		}
+
+		// 0x83
+		case Opcode::ADD_A_E:		// 4
+		{
+			reg.A = Math::Add(reg.A, reg.E);
+			break;
+		}
+
+		// 0x84
+		case Opcode::ADD_A_H:		// 4
+		{
+			reg.A = Math::Add(reg.A, reg.H);
+			break;
+		}
+
+		// 0x85
+		case Opcode::ADD_A_L:		// 4
+		{
+			reg.A = Math::Add(reg.A, reg.L);
+			break;
+		}
+
+		// 0x86
+		case Opcode::ADD_A_$HL:		// 8
+		{
+			instructions.push([]() { reg.A = Math::Add(reg.A, Bus::LoadU8(reg.HL)); });
+			break;
+		}
+
+		// 0x87
+		case Opcode::ADD_A_A:		// 4
+		{
+			reg.A = Math::Add(reg.A, reg.A);
+			break;
+		}
+
+		// 0x88
+		case Opcode::ADC_A_B:		// 4
+		{
+			reg.A = Math::AddWithCarry(reg.A, reg.B);
+			break;
+		}
+
+		// 0x89
+		case Opcode::ADC_A_C:		// 4
+		{
+			reg.A = Math::AddWithCarry(reg.A, reg.C);
+			break;
+		}
+
+		// 0x8A
+		case Opcode::ADC_A_D:		// 4
+		{
+			reg.A = Math::AddWithCarry(reg.A, reg.D);
+			break;
+		}
+
+		// 0x8B
+		case Opcode::ADC_A_E:		// 4
+		{
+			reg.A = Math::AddWithCarry(reg.A, reg.E);
+			break;
+		}
+
+		// 0x8C
+		case Opcode::ADC_A_H:		// 4
+		{
+			reg.A = Math::AddWithCarry(reg.A, reg.H);
+			break;
+		}
+
+		// 0x8D
+		case Opcode::ADC_A_L:		// 4
+		{
+			reg.A = Math::AddWithCarry(reg.A, reg.L);
+			break;
+		}
+
+		// 0x88
+		case Opcode::ADC_A_$HL:		// 8
+		{
+			instructions.push([]() { reg.A = Math::AddWithCarry(reg.A, Bus::LoadU8(reg.HL)); });
+			break;
+		}
+
+		// 0x8F
+		case Opcode::ADC_A_A:		// 4
+		{
+			reg.A = Math::AddWithCarry(reg.A, reg.A);
+			break;
+		}
 	}
-	}
+
 	// 0x90
 	{
 	case Opcode::SUB_B:
@@ -1625,6 +1732,7 @@ void ProcessOpcode(Opcode opcode)
 		break;
 	}
 	}
+
 	// 0xA0
 	{
 	case Opcode::XOR_A:			// 4
