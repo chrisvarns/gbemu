@@ -998,45 +998,162 @@ void ProcessOpcode(Opcode opcode)
 
 	// Group 0x30
 	{
-	case Opcode::LD_SP_NN:		// 12
-	{
-		instructions.push([]() { reg.SP_P = Bus::LoadU8(reg.PC++); });
-		instructions.push([]() { reg.SP_S = Bus::LoadU8(reg.PC++); });
-		break;
-	}
-	case Opcode::LD_$HLD_A:		// 8
-	{
-		instructions.push([]() { Bus::StoreU8(reg.HL--, reg.A); });
-		break;
-	}
-	case Opcode::INC_$HL:		// 12
-	{
-		instructions.push([]() { reg.temp.H = Bus::LoadU8(reg.HL); });
-		instructions.push([]()
+		// 0x30
+		case Opcode::JR_NC_N:		// 12/8
 		{
-			Math::Inc(reg.temp.H);
-			Bus::StoreU8(reg.HL, reg.temp.H);
-		});
-		break;
+			instructions.push([]() { reg.temp.L = Bus::LoadU8(reg.PC++); });
+			conditionalActionTaken = (reg.C & (u8)Flags::Z) == 0;
+			if (conditionalActionTaken)
+			{
+				instructions.push([]() { reg.PC += s8(reg.temp.L); });
+			}
+			break;
+		}
+
+		// 0x31
+		case Opcode::LD_SP_NN:		// 12
+		{
+			instructions.push([]() { reg.SP_P = Bus::LoadU8(reg.PC++); });
+			instructions.push([]() { reg.SP_S = Bus::LoadU8(reg.PC++); });
+			break;
+		}
+
+		// 0x32
+		case Opcode::LD_$HLD_A:		// 8
+		{
+			instructions.push([]() { Bus::StoreU8(reg.HL--, reg.A); });
+			break;
+		}
+
+		// 0x33
+		case Opcode::INC_SP:		// 8
+		{
+			instructions.push([]() { Math::Inc(reg.SP); });
+			break;
+		}
+
+		// 0x34
+		case Opcode::INC_$HL:		// 12
+		{
+			instructions.push([]() { reg.temp.H = Bus::LoadU8(reg.HL); });
+			instructions.push([]()
+			{
+				Math::Inc(reg.temp.H);
+				Bus::StoreU8(reg.HL, reg.temp.H);
+			});
+			break;
+		}
+
+		// 0x35
+		case Opcode::DEC_$HL:		// 12
+		{
+			instructions.push([]() { reg.temp.H = Bus::LoadU8(reg.HL); });
+			instructions.push([]()
+			{
+				Math::Dec(reg.temp.H);
+				Bus::StoreU8(reg.HL, reg.temp.H);
+			});
+			break;
+		}
+
+		// 0x36
+		case Opcode::LD_$HL_N:		// 12
+		{
+			instructions.push([]() { reg.temp.H = Bus::LoadU8(reg.PC++); });
+			instructions.push([]() { Bus::StoreU8(reg.HL, reg.temp.H); });
+			break;
+		}
+
+		// 0x37
+		case Opcode::SCF:			// 4
+		{
+			bool z = reg.F & (u8)Flags::Z;
+			bool n = false;
+			bool h = false;
+			bool c = true;
+
+			reg.F =
+				(z ? (u8)Flags::Z : 0) |
+				(n ? (u8)Flags::N : 0) |
+				(h ? (u8)Flags::H : 0) |
+				(c ? (u8)Flags::C : 0);
+
+			break;
+		}
+
+		// 0x38
+		case Opcode::JR_C_N:		// 12/8
+		{
+			instructions.push([]() { reg.temp.L = Bus::LoadU8(reg.PC++); });
+			conditionalActionTaken = (reg.F & (u8)Flags::N) == 0;
+			if (conditionalActionTaken)
+			{
+				instructions.push([]() { reg.PC += s8(reg.temp.L); });
+			}
+			break;
+		}
+
+		// 0x39
+		case Opcode::ADD_HL_SP:		// 8
+		{
+			instructions.push([]() { reg.HL = Math::Add(reg.HL, reg.SP); });
+			break;
+		}
+
+		// 0x3A
+		case Opcode::LD_A_$HLD:		// 8
+		{
+			instructions.push([]() { reg.A = Bus::LoadU8(reg.HL--); });		// is this decrement ok?
+		}
+
+		// 0x3B
+		case Opcode::DEC_SP:		// 8
+		{
+			instructions.push([]() { Math::Dec(reg.SP); });
+		}
+
+		// 0x3C
+		case Opcode::INC_A:
+		{
+			// note : incrementing register is a free operation.
+			Math::Inc(reg.A);
+			break;
+		}
+
+		// 0x3D
+		case Opcode::DEC_A:
+		{
+			// note : decrementing register is a free operation.
+			Math::Dec(reg.A);
+			break;
+		}
+
+		// 0x3E
+		case Opcode::LD_A_N:		// 8
+		{
+			instructions.push([]() { reg.A = Bus::LoadU8(reg.PC++); });
+			break;
+		}
+
+		// 0x3F
+		case Opcode::CCF:			// 4
+		{
+			bool z = reg.F & (u8)Flags::Z;
+			bool n = false;
+			bool h = false;
+			bool c = !(reg.F & (u8)Flags::C);
+
+			reg.F =
+				(z ? (u8)Flags::Z : 0) |
+				(n ? (u8)Flags::N : 0) |
+				(h ? (u8)Flags::H : 0) |
+				(c ? (u8)Flags::C : 0);
+
+			break;
+		}
 	}
-	case Opcode::INC_A:
-	{
-		// note : incrementing register is a free operation.
-		Math::Inc(reg.A);
-		break;
-	}
-	case Opcode::DEC_A:
-	{
-		Math::Dec(reg.A);
-		break;
-	}
-	case Opcode::LD_A_N:		// 8
-	{
-		instructions.push([]() { reg.A = Bus::LoadU8(reg.PC++); });
-		break;
-	}
-	}
-	// 0x40
+
+	// Group 0x40
 	{
 	case Opcode::LD_C_A:		// 4
 	{
