@@ -1839,15 +1839,121 @@ void ProcessOpcode(Opcode opcode)
 		}
 	}
 
-	// 0xA0
+	// Group 0xA0
 	{
-	case Opcode::XOR_A:			// 4
-	{
-		// note : xor is a free operation.
-		Math::Xor(reg.A);
-		break;
+		// 0xA0
+		case Opcode::AND_B:			// 4
+		{
+			reg.A = Math::And(reg.A, reg.B);
+			break;
+		}
+
+		// 0xA1
+		case Opcode::AND_C:			// 4
+		{
+			reg.A = Math::And(reg.A, reg.C);
+			break;
+		}
+
+		// 0xA2
+		case Opcode::AND_D:			// 4
+		{
+			reg.A = Math::And(reg.A, reg.D);
+			break;
+		}
+
+		// 0xA3
+		case Opcode::AND_E:			// 4
+		{
+			reg.A = Math::And(reg.A, reg.E);
+			break;
+		}
+
+		// 0xA4
+		case Opcode::AND_H:			// 4
+		{
+			reg.A = Math::And(reg.A, reg.H);
+			break;
+		}
+
+		// 0xA5
+		case Opcode::AND_L:			// 4
+		{
+			reg.A = Math::And(reg.A, reg.L);
+			break;
+		}
+
+		// 0xA0
+		case Opcode::AND_$HL:			// 8
+		{
+			instructions.push([]() { reg.A = Math::And(reg.A, Bus::LoadU8(reg.HL)); });
+			break;
+		}
+
+		// 0xA7
+		case Opcode::AND_A:			// 4
+		{
+			reg.A = Math::And(reg.A, reg.A);
+			break;
+		}
+
+		// 0xA8
+		case Opcode::XOR_B:			// 4
+		{
+			Math::Xor(reg.B);
+			break;
+		}
+
+		// 0xA9
+		case Opcode::XOR_C:			// 4
+		{
+			Math::Xor(reg.C);
+			break;
+		}
+
+		// 0xAA
+		case Opcode::XOR_D:			// 4
+		{
+			Math::Xor(reg.D);
+			break;
+		}
+
+		// 0xAB
+		case Opcode::XOR_E:			// 4
+		{
+			Math::Xor(reg.E);
+			break;
+		}
+
+		// 0xAC
+		case Opcode::XOR_H:			// 4
+		{
+			Math::Xor(reg.H);
+			break;
+		}
+
+		// 0xAD
+		case Opcode::XOR_L:			// 4
+		{
+			Math::Xor(reg.L);
+			break;
+		}
+
+		// 0xAE
+		case Opcode::XOR_$HL:		// 8
+		{
+			instructions.push([]() { Math::Xor(Bus::LoadU8(reg.HL)); });
+			break;
+		}
+
+		// 0xAF
+		case Opcode::XOR_A:			// 4
+		{
+			Math::Xor(reg.A);
+			break;
+		}
 	}
-	}
+
 	// 0xB0
 	{
 	case Opcode::CP_$HL:
