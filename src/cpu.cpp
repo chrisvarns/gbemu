@@ -1724,13 +1724,119 @@ void ProcessOpcode(Opcode opcode)
 		}
 	}
 
-	// 0x90
+	// Group 0x90
 	{
-	case Opcode::SUB_B:
-	{
-		Math::SubFromA(reg.B);
-		break;
-	}
+		// 0x090
+		case Opcode::SUB_B:			// 4
+		{
+			Math::SubFromA(reg.B);
+			break;
+		}
+
+		// 0x091
+		case Opcode::SUB_C:			// 4
+		{
+			Math::SubFromA(reg.C);
+			break;
+		}
+
+		// 0x092
+		case Opcode::SUB_D:			// 4
+		{
+			Math::SubFromA(reg.D);
+			break;
+		}
+
+		// 0x093
+		case Opcode::SUB_E:			// 4
+		{
+			Math::SubFromA(reg.E);
+			break;
+		}
+
+		// 0x094
+		case Opcode::SUB_H:			// 4
+		{
+			Math::SubFromA(reg.H);
+			break;
+		}
+
+		// 0x095
+		case Opcode::SUB_L:			// 4
+		{
+			Math::SubFromA(reg.L);
+			break;
+		}
+
+		// 0x096
+		case Opcode::SUB_$HL:		// 8
+		{
+			instructions.push([]() { Math::SubFromA(Bus::LoadU8(reg.HL)); });
+			break;
+		}
+
+		// 0x097
+		case Opcode::SUB_A:			// 4
+		{
+			Math::SubFromA(reg.A);
+			break;
+		}
+
+		// 0x098
+		case Opcode::SBC_A_B:		// 4
+		{
+			Math::SubWithCarryFromA(reg.B);
+			break;
+		}
+
+		// 0x099
+		case Opcode::SBC_A_C:		// 4
+		{
+			Math::SubWithCarryFromA(reg.C);
+			break;
+		}
+
+		// 0x09A
+		case Opcode::SBC_A_D:		// 4
+		{
+			Math::SubWithCarryFromA(reg.D);
+			break;
+		}
+
+		// 0x09B
+		case Opcode::SBC_A_E:		// 4
+		{
+			Math::SubWithCarryFromA(reg.E);
+			break;
+		}
+
+		// 0x09C
+		case Opcode::SBC_A_H:		// 4
+		{
+			Math::SubWithCarryFromA(reg.H);
+			break;
+		}
+
+		// 0x09D
+		case Opcode::SBC_A_L:		// 4
+		{
+			Math::SubWithCarryFromA(reg.L);
+			break;
+		}
+
+		// 0x098
+		case Opcode::SBC_A_$HL:		// 8
+		{
+			instructions.push([]() { Math::SubWithCarryFromA(Bus::LoadU8(reg.HL)); });
+			break;
+		}
+
+		// 0x09F
+		case Opcode::SBC_A_A:		// 4
+		{
+			Math::SubWithCarryFromA(reg.A);
+			break;
+		}
 	}
 
 	// 0xA0

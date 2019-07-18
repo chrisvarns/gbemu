@@ -46,6 +46,21 @@ namespace Math
 
 	void SubFromA(u8 val)
 	{
+		u8 carry = (reg.F & (u8)Flags::C) ? (u8)1U : (u8)0U;
+		u8 result = reg.A - (val + carry);
+
+		bool z = result == 0;
+		bool n = true;
+		bool h = ((s16)(reg.A & 0x0F)) >= ((s16)(val & 0x0F)); // Set if no borrow from bit 4
+		bool c = ((s16)reg.A - (s16)val) < 0x00;
+
+		SET_FLAG_REG(z, n, h, c);
+
+		reg.A = result;
+	}
+
+	void SubWithCarryFromA(u8 val)
+	{
 		u8 result = reg.A - val;
 
 		bool z = result == 0;

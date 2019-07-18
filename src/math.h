@@ -16,6 +16,7 @@ namespace Math
 	u16 Add(u16 a, u16 b);
 
 	void SubFromA(u8 val);
+	void SubWithCarryFromA(u8 val);
 
 	void Inc(u8& a);
 	void Dec(u8& a);
