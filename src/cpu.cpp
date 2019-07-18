@@ -1884,7 +1884,7 @@ void ProcessOpcode(Opcode opcode)
 		}
 
 		// 0xA0
-		case Opcode::AND_$HL:			// 8
+		case Opcode::AND_$HL:		// 8
 		{
 			instructions.push([]() { reg.A = Math::And(reg.A, Bus::LoadU8(reg.HL)); });
 			break;
@@ -1954,14 +1954,121 @@ void ProcessOpcode(Opcode opcode)
 		}
 	}
 
-	// 0xB0
+	// Group 0xB0
 	{
-	case Opcode::CP_$HL:
-	{
-		instructions.push([]() { Math::Compare(Bus::LoadU8(reg.HL)); });
-		break;
+		// 0xB0
+		case Opcode::OR_B:			// 4
+		{
+			reg.A = Math::Or(reg.A, reg.B);
+			break;
+		}
+
+		// 0xB1
+		case Opcode::OR_C:			// 4
+		{
+			reg.A = Math::Or(reg.A, reg.C);
+			break;
+		}
+
+		// 0xB2
+		case Opcode::OR_D:			// 4
+		{
+			reg.A = Math::Or(reg.A, reg.D);
+			break;
+		}
+
+		// 0xB3
+		case Opcode::OR_E:			// 4
+		{
+			reg.A = Math::Or(reg.A, reg.E);
+			break;
+		}
+
+		// 0xB4
+		case Opcode::OR_H:			// 4
+		{
+			reg.A = Math::Or(reg.A, reg.H);
+			break;
+		}
+
+		// 0xB5
+		case Opcode::OR_L:			// 4
+		{
+			reg.A = Math::Or(reg.A, reg.L);
+			break;
+		}
+
+		// 0xB6
+		case Opcode::OR_$HL:		// 8
+		{
+			instructions.push([]() { reg.A = Math::Or(reg.A, Bus::LoadU8(reg.HL)); });
+			break;
+		}
+
+		// 0xB7
+		case Opcode::OR_A:			// 4
+		{
+			reg.A = Math::Or(reg.A, reg.A);
+			break;
+		}
+
+		// 0xB8
+		case Opcode::CP_B:			// 4
+		{
+			Math::Compare(reg.B);
+			break;
+		}
+
+		// 0xB9
+		case Opcode::CP_C:			// 4
+		{
+			Math::Compare(reg.C);
+			break;
+		}
+
+		// 0xBA
+		case Opcode::CP_D:			// 4
+		{
+			Math::Compare(reg.D);
+			break;
+		}
+
+		// 0xBB
+		case Opcode::CP_E:			// 4
+		{
+			Math::Compare(reg.E);
+			break;
+		}
+
+		// 0xBC
+		case Opcode::CP_H:			// 4
+		{
+			Math::Compare(reg.H);
+			break;
+		}
+
+		// 0xBD
+		case Opcode::CP_L:			// 4
+		{
+			Math::Compare(reg.L);
+			break;
+		}
+
+		// 0xBE
+		case Opcode::CP_$HL:		// 8
+		{
+			instructions.push([]() { Math::Compare(Bus::LoadU8(reg.HL)); });
+			break;
+		}
+
+		// 0xBF
+		case Opcode::CP_A:			// 4
+		{
+			Math::Compare(reg.A);
+			break;
+		}
 	}
-	}
+
 	// 0xC0
 	{
 	case Opcode::POP_BC:		// 12
