@@ -46,8 +46,7 @@ namespace Math
 
 	void SubFromA(u8 val)
 	{
-		u8 carry = (reg.F & (u8)Flags::C) ? (u8)1U : (u8)0U;
-		u8 result = reg.A - (val + carry);
+		u8 result = reg.A - val;
 
 		bool z = result == 0;
 		bool n = true;
@@ -61,7 +60,8 @@ namespace Math
 
 	void SubWithCarryFromA(u8 val)
 	{
-		u8 result = reg.A - val;
+		u8 carry = (reg.F & (u8)Flags::C) ? (u8)1U : (u8)0U;
+		u8 result = reg.A - (val + carry);
 
 		bool z = result == 0;
 		bool n = true;
