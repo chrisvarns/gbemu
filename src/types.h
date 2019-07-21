@@ -1,12 +1,11 @@
 #pragma once
-#include <stdint.h>
 
-typedef uint8_t u8;
-typedef uint16_t u16;
-typedef uint32_t u32;
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
 
-typedef int8_t s8;
-typedef int16_t s16;
+typedef char s8;
+typedef short s16;
 
 
 union u16split
@@ -16,6 +15,6 @@ union u16split
 		u8 L;
 		u8 H;
 	};
-	uint16_t Full;
+	u16 Full;
 };
 

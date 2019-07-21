@@ -1,4 +1,5 @@
 #include "constants.h"
+#include "cpu.h"
 #include "main.h"
 #include "bus.h"
 #include "ppu.h"
@@ -187,21 +188,44 @@ void WritePixel(FifoPixel fifo_pixel)
 #endif // 0
  }
 
-void TriggerHBlank()
+void BeginHBlank()
 {
 	ppu_stage = PPU_STAGE::HBLANK;
 	fifo_mode = FIFO_MODE::DISABLED;
 	fetch_mode = FETCH_MODE::DISABLED;
 
-	// todo trigger interrupt on CPU
+	// trigger interrupt
+	{
+		u8 statRegister = Bus::LoadU8((u16)SpecialRegister::VIDEO_LCD_STATUS);
+
+		statRegister &= ~(u8)LCD_STATUS_FLAGS::CURRENT_MODE_BITS; // Zero out current mode
+		statRegister |= (u8)LCD_STATUS_FLAGS::CURRENT_MODE_HBLANK; // Set current mode
+		statRegister |= (u8)LCD_STATUS_FLAGS::INTERRUPT_MODE_HBLANK; // Set the HBlank interrupt bit
+
+		Bus::StoreU8_PPU((u16)SpecialRegister::VIDEO_LCD_STATUS, statRegister);
+		CPU::RaiseInterrupt(INTERRUPT_FLAGS::LCD_STAT);
+	}
 }
 
-void TriggerVBlank()
+void BeginVBlank()
 {
 	ppu_stage = PPU_STAGE::VBLANK;
 	PresentBackBuffer();
 
-	// todo trigger interrupt on CPU
+	// trigger interrupt
+	{
+		u8 statRegister = Bus::LoadU8((u16)SpecialRegister::VIDEO_LCD_STATUS);
+
+		statRegister &= ~(u8)LCD_STATUS_FLAGS::CURRENT_MODE_BITS; // Zero out current mode
+		statRegister |= (u8)LCD_STATUS_FLAGS::CURRENT_MODE_VBLANK; // Set current mode
+		statRegister |= (u8)LCD_STATUS_FLAGS::INTERRUPT_MODE_VBLANK; // Set the HBlank interrupt bit
+
+		Bus::StoreU8_PPU((u16)SpecialRegister::VIDEO_LCD_STATUS, statRegister);
+		CPU::RaiseInterrupt(INTERRUPT_FLAGS::VBLANK);
+
+		// todo : Raise the LCD_STAT too??
+		//CPU::RaiseInterrupt(INTERRUPT_FLAGS::LCD_STAT);
+	}
 }
 
 void StepFifo()
@@ -226,7 +250,7 @@ void StepFifo()
 			fifo_pixels_written_out++;
 			if (fifo_pixels_written_out == DISPLAY_WIDTH)
 			{
-				TriggerHBlank();
+				BeginHBlank();
 			}
 		}
 	}
@@ -343,7 +367,7 @@ bool IsPpuEnabled()
 	return lcdc_reg & (u8)LCD_CONTROL_FLAGS::POWER;
 }
 
-void StartPixelTransfer()
+void BeginPixelTransfer()
 {
 	ppu_stage = PPU_STAGE::PIXEL_TRANSFER;
 
@@ -358,6 +382,34 @@ void StartPixelTransfer()
 	fetch_fetched_bg_tiles = 0;
 	fetch_stage = (FETCH_STAGE)0;
 	fetch_mode = FETCH_MODE::BACKGROUND;
+
+	// set status register
+	{
+		u8 statRegister = Bus::LoadU8((u16)SpecialRegister::VIDEO_LCD_STATUS);
+
+		statRegister &= ~(u8)LCD_STATUS_FLAGS::CURRENT_MODE_BITS; // Zero out current mode
+		statRegister |= (u8)LCD_STATUS_FLAGS::CURRENT_MODE_TRANSFER; // Set current mode
+
+		Bus::StoreU8_PPU((u16)SpecialRegister::VIDEO_LCD_STATUS, statRegister);
+		// no interrupt to raise for TRANSFER
+	}
+}
+
+void BeginOAMSearch()
+{
+	ppu_stage = PPU_STAGE::OAM_SEARCH;
+
+	// trigger interrupt
+	{
+		u8 statRegister = Bus::LoadU8((u16)SpecialRegister::VIDEO_LCD_STATUS);
+
+		statRegister &= ~(u8)LCD_STATUS_FLAGS::CURRENT_MODE_BITS; // Zero out current mode
+		statRegister |= (u8)LCD_STATUS_FLAGS::CURRENT_MODE_OAM; // Set current mode
+		statRegister |= (u8)LCD_STATUS_FLAGS::INTERRUPT_MODE_OAM;
+
+		Bus::StoreU8_PPU((u16)SpecialRegister::VIDEO_LCD_STATUS, statRegister);
+		CPU::RaiseInterrupt(INTERRUPT_FLAGS::LCD_STAT);
+	}
 }
 
 void StartNewFrame()
@@ -369,7 +421,6 @@ void StartNewFrame()
 		sdl_texture_locked = true;
 	}
 	sdl_pixels_write = sdl_pixels;
-
 	SDL_Log("Frame %d", ++current_frame_index);
 }
 
@@ -403,21 +454,22 @@ void PPU::Step()
 	if (ly_reg == 0 && current_h_cycle == 0)
 	{
 		StartNewFrame();
+		BeginOAMSearch();
 	}
 	else if (InRange(ly_reg, VBLANK_START_LINE, NUM_LINES_TOTAL))
 	{
 		if (ly_reg == VBLANK_START_LINE && current_h_cycle == 0)
 		{
-			TriggerVBlank();
+			BeginVBlank();
 		}
 	}
 	else if (current_h_cycle == 0)
 	{
-		ppu_stage = PPU_STAGE::OAM_SEARCH;
+		BeginOAMSearch();
 	}
 	else if (current_h_cycle == PIXEL_TRANSFER_START_CYCLE)
 	{
-		StartPixelTransfer();
+		BeginPixelTransfer();
 	}
 	// HBlank triggered by the fifo once all pixels are scanned out
 

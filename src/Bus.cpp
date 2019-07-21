@@ -17,6 +17,7 @@ inline u8 HandleIORead(u16 address)
 	SpecialRegister special_register = SpecialRegister(address);
 	switch (special_register)
 	{
+	case SpecialRegister::INTERRUPT_FLAG:
 	case SpecialRegister::SOUND_NR11:
 	case SpecialRegister::SOUND_NR12:
 	case SpecialRegister::SOUND_NR13:
@@ -25,6 +26,7 @@ inline u8 HandleIORead(u16 address)
 	case SpecialRegister::SOUND_NR51:
 	case SpecialRegister::SOUND_NR52:
 	case SpecialRegister::VIDEO_LCD_CONTROL:
+	case SpecialRegister::VIDEO_LCD_STATUS:
 	case SpecialRegister::VIDEO_SCROLLY:
 	case SpecialRegister::VIDEO_SCROLLX:
 	case SpecialRegister::VIDEO_CURRENT_SCANLINE:
@@ -44,6 +46,7 @@ inline void HandleIOWrite(u16 address, u8 val)
 	SpecialRegister special_register = SpecialRegister(address);
 	switch (special_register)
 	{
+	case SpecialRegister::INTERRUPT_FLAG:
 	case SpecialRegister::SOUND_NR11:
 	case SpecialRegister::SOUND_NR12:
 	case SpecialRegister::SOUND_NR13:
@@ -56,6 +59,7 @@ inline void HandleIOWrite(u16 address, u8 val)
 		break;
 	}
 	case SpecialRegister::VIDEO_LCD_CONTROL:
+	case SpecialRegister::VIDEO_LCD_STATUS:
 	case SpecialRegister::VIDEO_SCROLLY:
 	case SpecialRegister::VIDEO_SCROLLX:
 	case SpecialRegister::VIDEO_BG_PALETTE:
@@ -64,7 +68,7 @@ inline void HandleIOWrite(u16 address, u8 val)
 		Memory::StoreU8(address, val);
 		break;
 	}
-	case SpecialRegister::VIDEO_CURRENT_SCANLINE:
+	case SpecialRegister::VIDEO_CURRENT_SCANLINE: // Should be calling StoreU8_PPU
 	default:
 		assert(false);
 	}

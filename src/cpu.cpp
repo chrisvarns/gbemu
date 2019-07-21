@@ -2,12 +2,22 @@
 #include <queue>
 
 #include "cpu.h"
-#include "math.h"
+
 #include "Bus.h"
+#include "constants.h"
+#include "math.h"
 #include "types.h"
 
 Registers reg;
 std::queue<void(*)(void)> instructions;
+
+static bool bHalted = false;
+static bool bRepeatPCPostHalt = false;
+
+static int interruptDisableDelay = -1;
+static int interruptEnableDelay = -1;
+
+static bool interruptMasterEnable = false;
 
 enum class Opcode : u8
 {
@@ -587,21 +597,110 @@ void CheckTiming(Opcode opcode, bool conditionalActionTaken)
 	}
 }
 
+void HandleHaltInstructionSideEffects()
+{
+	// emulate the "PC repeat" that occurs when HALT occurs while interrupts are disabled
+	if (bRepeatPCPostHalt)
+	{
+		bRepeatPCPostHalt = false;
+		reg.PC--; // Note if the code contains 2 HALTs in a row this hangs the CPU, which is correct emulation!
+	}
+}
+
+void HandleIMEFlagChange()
+{
+	// Enable/Disable the master interrupt enable flag after a 1 opcode delay
+	if (interruptEnableDelay > -1)
+	{
+		if (interruptEnableDelay-- == 0)
+		{
+			interruptMasterEnable = true;
+		}
+	}
+	if (interruptDisableDelay > -1)
+	{
+		if (interruptDisableDelay-- == 0)
+		{
+			interruptMasterEnable = false;
+		}
+	}
+}
+
+void CPU::RaiseInterrupt(INTERRUPT_FLAGS interrupt)
+{
+	u8 interruptFlagRegister = Bus::LoadU8((u16)SpecialRegister::INTERRUPT_FLAG);
+	interruptFlagRegister |= (u8)interrupt;
+	Bus::StoreU8((u16)SpecialRegister::INTERRUPT_FLAG, interruptFlagRegister);
+}
+
+void HandlePendingInterrupt()
+{
+	if (interruptMasterEnable)
+	{
+		u8 interruptFlagRegister = Bus::LoadU8((u16)SpecialRegister::INTERRUPT_FLAG);
+		if (interruptFlagRegister & (u8)INTERRUPT_FLAGS::ANY)
+		{
+			u16 interruptAddress = 0;
+
+			u8 interruptEnableRegister = Bus::LoadU8((u16)SpecialRegister::INTERRUPT_ENABLE);
+
+			// Go in priority order
+			for (u8 i = 0; i < 5; i++)
+			{
+				u8 flagBit = 1 << i;
+
+				if (interruptFlagRegister & flagBit
+					&& interruptEnableRegister & flagBit)
+				{
+					interruptAddress = (u16)AddressRegion::INTERRUPT_VECTOR_START + (0x08 * i);
+					interruptFlagRegister = interruptFlagRegister & ~flagBit;
+					Bus::StoreU8((u16)SpecialRegister::INTERRUPT_FLAG, interruptFlagRegister);
+					break;
+				}
+			}
+
+			if (interruptAddress)
+			{
+				interruptMasterEnable = false;
+				Bus::StoreU8(--reg.SP, reg.PC_P);
+				Bus::StoreU8(--reg.SP, reg.PC_C);
+				reg.PC = interruptAddress;
+
+				bHalted = false;
+			}
+		}
+	}
+}
+
 void CPU::Step()
 {
-	// note : each cpu sub operation takes 4 clock cycles
-	if (instructions.empty())
+	if (!bHalted)
 	{
-		// note : read the next opcode from memory, 1 cpu cycle
-		Opcode opcode = (Opcode)Bus::LoadU8(reg.PC++);
-		ProcessOpcode(opcode);
-	}
-	else
-	{
-		// note : execute the next sub operation.
-		auto instruction = instructions.front();
-		instructions.pop();
-		instruction();
+		// note : each cpu sub operation takes 4 clock cycles
+		if (instructions.empty())
+		{
+			// note :	some docs suggest the change happens after the next machine cycle, some suggest after the next opcode is executed.
+			//			After the next machine cycle means reading the next opcode, but not the operands (if there are any) before handling the interrupt.
+			//			I can't reason how this would be safe, so i am taking the "after the next opcode is executed" reading
+			//			There's no _logical_ difference between the 2 options, but there is a slight _timing_ difference.
+			HandleIMEFlagChange();
+
+			HandlePendingInterrupt();
+
+			// note : read the next opcode from memory, 1 cpu cycle
+			Opcode opcode = (Opcode)Bus::LoadU8(reg.PC++);
+
+			HandleHaltInstructionSideEffects();
+
+			ProcessOpcode(opcode);
+		}
+		else
+		{
+			// note : execute the next sub operation.
+			auto instruction = instructions.front();
+			instructions.pop();
+			instruction();
+		}
 	}
 };
 
@@ -1540,7 +1639,15 @@ void ProcessOpcode(Opcode opcode)
 		// 0x76
 		case Opcode::HALT:			// 4
 		{
-			assert(false && "Opcode 0x76 HALT not yet implemented");	// todo : implement this opcode
+			if (interruptMasterEnable)
+			{
+				bHalted = true;
+			}
+			else
+			{
+				// todo if (GB/SGB/GBP)
+				bRepeatPCPostHalt = true;
+			}
 			break;
 		}
 
@@ -2077,7 +2184,7 @@ void ProcessOpcode(Opcode opcode)
 		instructions.push([]() { reg.B = Bus::LoadU8(reg.SP++); });
 		break;
 	}
-	case Opcode::JP_NN:
+	case Opcode::JP_NN:			// 16
 	{
 		instructions.push([]() { reg.temp.L = Bus::LoadU8(reg.PC++); });
 		instructions.push([]() { reg.temp.H = Bus::LoadU8(reg.PC++); });
@@ -2091,7 +2198,7 @@ void ProcessOpcode(Opcode opcode)
 		instructions.push([]() { /* Do nothing */});
 		break;
 	}
-	case Opcode::RET:
+	case Opcode::RET:			// 16
 	{
 		instructions.push([]() { reg.temp.L = Bus::LoadU8(reg.SP++); });
 		instructions.push([]() { reg.temp.H = Bus::LoadU8(reg.SP++); });
@@ -2116,6 +2223,13 @@ void ProcessOpcode(Opcode opcode)
 	}
 	// 0xD0
 	{
+	case Opcode::RETI:			// 16
+	{
+		instructions.push([]() { reg.PC_C = Bus::LoadU8(reg.SP++); });
+		instructions.push([]() { reg.PC_P = Bus::LoadU8(reg.SP++); });
+		instructions.push([]() { interruptMasterEnable = true; });
+		break;
+	}
 	}
 	// 0xE0
 	{
@@ -2146,11 +2260,23 @@ void ProcessOpcode(Opcode opcode)
 		instructions.push([]() { reg.A = Bus::LoadU8(0xFF00 + reg.temp.L); });
 		break;
 	}
+	case Opcode::DI:			// 4
+	{
+		// This disables interrupts, but only after the next instruction is complete
+		interruptDisableDelay = 1;
+		break;
+	}
 	case Opcode::LD_A_$NN:		// 18
 	{
 		instructions.push([]() { reg.temp.H = Bus::LoadU8(reg.PC++); });
 		instructions.push([]() { reg.temp.L = Bus::LoadU8(reg.PC++); });
 		instructions.push([]() { reg.A = Bus::LoadU8(reg.temp.Full); });
+		break;
+	}
+	case Opcode::EI:			// 4
+	{
+		// This enables interrupts, but only after the next instruction is complete
+		interruptEnableDelay = 1;
 		break;
 	}
 	case Opcode::CP_N:			// 8

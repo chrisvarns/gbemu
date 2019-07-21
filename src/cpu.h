@@ -68,9 +68,12 @@ struct Registers
 
 extern Registers reg;
 
+enum class INTERRUPT_FLAGS : u8;
+
 class CPU
 {
 public:
 	static void Step();
+	static void RaiseInterrupt(INTERRUPT_FLAGS interrupt);
 };
 

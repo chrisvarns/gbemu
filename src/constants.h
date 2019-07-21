@@ -8,6 +8,7 @@ const int total_gb_display_bytes = gb_width * gb_height * bytes_per_pixel;
 
 enum class SpecialRegister : u16
 {
+	INTERRUPT_FLAG = 0xFF0F,
 	SOUND_NR11 = 0xFF11,
 	SOUND_NR12 = 0xFF12,
 	SOUND_NR13 = 0xFF13,
@@ -16,6 +17,7 @@ enum class SpecialRegister : u16
 	SOUND_NR51 = 0xFF25,
 	SOUND_NR52 = 0xFF26,
 	VIDEO_LCD_CONTROL = 0xFF40,
+	VIDEO_LCD_STATUS = 0xFF41,
 	VIDEO_SCROLLY = 0xFF42,
 	VIDEO_SCROLLX = 0xFF43,
 	VIDEO_CURRENT_SCANLINE = 0xFF44,
@@ -31,6 +33,7 @@ enum class AddressRegion : u16
 	BOOTROM_START = 0x0000,
 	BOOTROM_END = 0x0100,
 	ROMBANK_STATIC_START = 0x0000,
+	INTERRUPT_VECTOR_START = 0x0040,
 	ROMBANK_STATIC_END = 0x4000,
 	ROMBANK_SWITCHABLE_START = 0x4000,
 	ROMBANK_SWITCHABLE_END = 0x8000,
@@ -76,6 +79,7 @@ enum class AddressRegion : u16
 	VIDEO_REGISTER_END = (u16)SpecialRegister::VIDEO_SPRITE1_PALETTE,
 };
 
+// VIDEO_LCD_CONTROL 0xFF40
 enum class LCD_CONTROL_FLAGS : u8
 {
 	POWER = 0x80,
@@ -86,4 +90,35 @@ enum class LCD_CONTROL_FLAGS : u8
 	SPRITE_SIZE = 0x04,
 	COLOR_0_WINDOW_TRANSPARENCY = 0x02,
 	BACKGROUND_DISPLAY = 0x01,
+};
+
+// VIDEO_LCD_STATUS 0xFF41
+enum class LCD_STATUS_FLAGS : u8
+{
+	// Read/Write, interrupts raised
+	INTERRUPT_LY_COINCIDENCE = 0x40,
+	INTERRUPT_MODE_OAM = 0x20,
+	INTERRUPT_MODE_VBLANK = 0x10,
+	INTERRUPT_MODE_HBLANK = 0x08,
+
+	// Read only, current state of LCD controller
+	CURRENT_COINCIDENCE = 0x04,
+	CURRENT_MODE_BITS = 0x03,
+
+	CURRENT_MODE_TRANSFER = 0x03,
+	CURRENT_MODE_OAM = 0x02,
+	CURRENT_MODE_VBLANK = 0x01,
+	CURRENT_MODE_HBLANK = 0x00,
+};
+
+// This is used both for INTERRUPT_ENABLE and INTERRUPT_FLAG registers
+enum class INTERRUPT_FLAGS : u8
+{
+	JOYPAD = 0x10,
+	SERIAL = 0x08,
+	TIMER = 0x04,
+	LCD_STAT = 0x02,
+	VBLANK = 0x01,
+
+	ANY = 0x1F
 };
