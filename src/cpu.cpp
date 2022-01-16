@@ -2692,8 +2692,6 @@ void ProcessOpcodeCB()
 
 
 
-//std::size_t cycles = 0;
-
 class A
 {
 public:
@@ -2943,31 +2941,6 @@ public:
 	}
 };
 
-
-//template <class SRC>
-//class $ { u8 GetU8() { return Bus::LoadU8(SRC.GetU8()) } };
-//
-//template <class SRC>
-//class $I
-//{
-//	u8 GetU8()
-//	{
-//		auto v = SRC.GetU8();
-//		SRC.SetU8(++v);
-//		return Bus::LoadU8(v);
-//	}
-//};
-//
-//template <class SRC>
-//class $D
-//{
-//	u8 GetU8()
-//	{
-//		auto v = SRC.GetU8();
-//		SRC.SetU8(--v);
-//		return Bus::LoadU8(v);
-//	}
-//};
 
 
 template <std::size_t cost>
