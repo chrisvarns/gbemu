@@ -2762,12 +2762,14 @@ public:
 
 class AF {
 public:
+	static const std::size_t size = 16;
 	static u16 Get() { return reg.AF; }
 	static void Set(u16 v) { reg.AF = v; }
 };
 
 class BC {
 public:
+	static const std::size_t size = 16;
 	static u16 Get() { return reg.BC; }
 	static u16 GetAddr() { return Get(); }
 	static void Set(u16 v) { reg.BC = v; }
@@ -2775,6 +2777,7 @@ public:
 
 class DE {
 public:
+	static const std::size_t size = 16;
 	static u16 Get() { return reg.DE; }
 	static u16 GetAddr() { return Get(); }
 	static void Set(u16 v) { reg.DE = v; }
@@ -2782,6 +2785,7 @@ public:
 
 class HL {
 public:
+	static const std::size_t size = 16;
 	static u16 Get() { return reg.HL; }
 	static u16 GetAddr() { return Get(); }
 	static void Set(u16 v) { reg.HL = v; }
@@ -2789,12 +2793,14 @@ public:
 
 class SP {
 public:
+	static const std::size_t size = 16;
 	static u16 Get() { return reg.SP; }
 	static void Set(u16 v) { reg.SP = v; }
 };
 
 class PC {
 public:
+	static const std::size_t size = 16;
 	static u16 Get() { return reg.PC; }
 	static void Set(u16 v) { reg.PC = v; }
 };
@@ -2821,14 +2827,19 @@ public:
 		v.H = Bus::LoadU8(reg.PC++);
 		return v.Full;
 	}
-	static u16 GetAddr() { return Get(); }
 };
 
 class a8 : public d8
-{ };
+{
+public:
+	static u16 GetAddr() { return u16(0xFF00) + (u16)Get(); }
+};
 
 class a16 : public d16
-{ };
+{
+public:
+	static u16 GetAddr() { return Get(); }
+};
 
 class r8
 {
@@ -2838,12 +2849,6 @@ public:
 	{
 		u8 v = Bus::LoadU8(reg.PC++);
 		return *reinterpret_cast<s8*>(&v);
-	}
-	static u16 GetAddr()
-	{
-		u8 u = Bus::LoadU8(reg.PC++);
-		s8 s = *reinterpret_cast<s8*>(&u);
-		return reg.SP + s; // todo(luke) : verify that the maths for adding u16 + s8 actully work as expected
 	}
 };
 
@@ -2943,6 +2948,63 @@ public:
 
 
 
+void SetFlags(int Z, int N, int H, int C) // todo(luke) : more efficient flag setting?
+{
+	if (Z < 0) { Z = (reg.F & (u8)Flags::Z) ? 1 : 0; }
+	if (N < 0) { N = (reg.F & (u8)Flags::N) ? 1 : 0; }
+	if (H < 0) { H = (reg.F & (u8)Flags::H) ? 1 : 0; }
+	if (C < 0) { C = (reg.F & (u8)Flags::C) ? 1 : 0; }
+
+	reg.F =
+		(Z ? (u8)Flags::Z : 0) |
+		(N ? (u8)Flags::N : 0) |
+		(H ? (u8)Flags::H : 0) |
+		(C ? (u8)Flags::C : 0) |
+		(reg.F & (u8)0x0000FFFFu);
+}
+
+const int _ = -1;
+
+
+u8 Add(u8 a, u8 b, int carry)
+{
+	bool h;
+	bool c;
+	u8 r = 0;
+
+	for (int i = 0; i < 4; ++i)
+	{
+		int index = 1 << i;
+		int abit = (a & index) ? 1 : 0;
+		int bbit = (b & index) ? 1 : 0;
+		int rbit = abit + bbit + carry;
+
+		carry = (rbit & 0b10) ? 1 : 0;
+		int v = (rbit & 0b01) ? index : 0;
+		r = r | v;
+	}
+	h = carry;
+
+	for (int i = 4; i < 8; ++i)
+	{
+		int index = 1 << i;
+		int abit = (a & index) ? 1 : 0;
+		int bbit = (b & index) ? 1 : 0;
+		int rbit = abit + bbit + carry;
+
+		carry = (rbit & 0b10) ? 1 : 0;
+		int v = (rbit & 0b01) ? index : 0;
+		r = r | v;
+	}
+	c = carry;
+
+	SetFlags(_, _, h, c);
+	return r;
+}
+
+
+
+
 template <std::size_t cost>
 std::size_t NOP()
 {
@@ -2952,38 +3014,80 @@ std::size_t NOP()
 template <class DST, class SRC, std::size_t cost>
 std::size_t LD()
 {
-	//static_assert(DST::size == SRC::size);
 	auto a = SRC::Get();
 	DST::Set(a);
+	return cost;
+}
+
+template <class DST, std::size_t cost>
+std::size_t LD_SPr8()
+{
+	u16split as; as.Full = reg.SP;
+	u16split bs; bs.Full = r8::Get();
+	u16split r{ 0, 0 };
+
+	r.L = Add(as.L, bs.L, 0);
+	int carry = (reg.F & (u8)Flags::C) ? 1 : 0;
+	r.H = Add(as.H, bs.H, 0);
+	DST::Set(r.Full);
+
+	SetFlags(0, 0, _, _);
 	return cost;
 }
 
 template <class DST, class SRC, std::size_t cost>
 std::size_t LDH()
 {
-	// todo(luke) : implement ldh
+	auto a = SRC::Get();
+	DST::Set(a);
 	return cost;
 }
 
 template <class DST, class SRC, std::size_t cost>
 std::size_t ADD()
 {
-	//static_assert(DST::size == SRC::size);
-	auto a = DST::Get();
-	auto b = SRC::Get();
-	DST::Set(a + b);
-	return cost;
+	if constexpr (DST::size == 8)
+	{
+		u8 a = SRC::Get();
+		u8 b = DST::Get();
+		u8 r = Add(a, b, 0);
+		DST::Set(r);
+
+		bool z = r == 0;
+		SetFlags(z, 0, _, _);
+		return cost;
+	}
+	else
+	{
+		u16split as; as.Full = SRC::Get();
+		u16split bs; bs.Full = DST::Get();
+		u16split r{ 0, 0 };
+
+		r.L = Add(as.L, bs.L, 0);
+		int carry = (reg.F & (u8)Flags::C) ? 1 : 0;
+		r.H = Add(as.H, bs.H, carry);
+		DST::Set(r.Full);
+
+		SetFlags(_, 0, _, _);
+		return cost;
+	}
 }
 
 template <class DST, class SRC, std::size_t cost>
 std::size_t ADC()
 {
-	//static_assert(DST::size == SRC::size);
-	auto a = DST::Get();
-	auto b = SRC::Get();
-	DST::Set(a + b);	// todo(luke) : implement add with carry or get it from math or something...
+	u8 a = SRC::Get();
+	u8 b = DST::Get();
+	int carry = (reg.F & (u8)Flags::C) ? 1 : 0;
+	u8 r = Add(a, b, 0);
+	DST::Set(r);
+
+	bool z = r == 0;
+	SetFlags(z, 0, _, _);
 	return cost;
 }
+
+// todo(luke) : implement methods bellow this
 
 template <class DST, class SRC, std::size_t cost>
 std::size_t SUB()
@@ -3248,7 +3352,7 @@ std::size_t PREFIX_CB()
 	return 4;
 }
 
-std::size_t _()
+std::size_t __()
 {
 	assert(false);
 	return 4;
@@ -3278,9 +3382,9 @@ operation operations[] =
 	AND<A,B, 4>,		AND<A,C, 4>,		AND<A,D, 4>,		AND<A,E, 4>,		AND<A,H, 4>,		AND<A,L, 4>,		AND<A,$(HL), 8>,	AND<A,A, 4>,		XOR<A,B, 4>,		XOR<A,C, 4>,		XOR<A,D, 4>,		XOR<A,E, 4>,		XOR<A,H, 4>,		XOR<A,L, 4>,		XOR<A,$(HL), 8>,	XOR<A,A, 4>,
 	OR<A,B, 4>,			OR<A,C, 4>,			OR<A,D, 4>,			OR<A,E, 4>,			OR<A,H, 4>,			OR<A,L, 4>,			OR<A,$(HL), 8>,		OR<A,A, 4>,			CP<A,B, 4>,			CP<A,C, 4>,			CP<A,D, 4>,			CP<A,E, 4>,			CP<A,H, 4>,			CP<A,L, 4>,			CP<A,$(HL), 8>,		CP<A,A, 4>,
 	RET<NZ, 20,8>,		POP<BC, 12>,		JP<NZ,a16, 16,12>,	JP<a16, 16>,		CALL<NZ,a16, 24,12>,PUSH<BC, 16>,		ADD<A,d8, 8>,		RST<0x00, 16>,		RET<Z, 20,8>,		RET<16>,			JP<Z,a16, 16,12>,	PREFIX_CB,			CALL<Z,a16, 24,12>,	CALL<a16, 24>,		ADC<A,d8, 8>,		RST<0x08, 16>,
-	RET<NC, 20,8>,		POP<DE, 12>,		JP<NC,a16, 16,12>,	_,					CALL<NC,a16, 24,12>,PUSH<DE, 16>,		SUB<A,d8, 8>,		RST<0x10, 16>,		RET<C, 20,8>,		RETI<16>,			JP<C,a16, 16,12>,	_,					CALL<C,a16, 24,12>,	_,					SBC<A,d8, 8>,		RST<0x18, 16>,
-	LDH<$(a8),A, 12>,	POP<HL, 12>,		LD<$(C),A, 8>,		_,					_,					PUSH<HL, 16>,		AND<A,d8, 8>,		RST<0x20, 16>,		ADD<SP,r8, 16>,		JP<$(HL), 4>,		LD<$(a16),A, 16>,	_,					_,					_,					XOR<A,d8, 8>,		RST<0x28, 16>,
-	LDH<A,$(a8), 12>,	POP<AF, 12>,		LD<A,$(C), 8>,		DI<4>,				_,					PUSH<AF, 16>,		OR<A,d8, 8>,		RST<0x30, 16>,		LD<HL,$(r8), 12>,	LD<HL,SP, 8>,		LD<A,$(a16), 16>,	EI<4>,				_,					_,					CP<A,d8, 8>,		RST<0x38, 16>
+	RET<NC, 20,8>,		POP<DE, 12>,		JP<NC,a16, 16,12>,	__,					CALL<NC,a16, 24,12>,PUSH<DE, 16>,		SUB<A,d8, 8>,		RST<0x10, 16>,		RET<C, 20,8>,		RETI<16>,			JP<C,a16, 16,12>,	__,					CALL<C,a16, 24,12>,	__,					SBC<A,d8, 8>,		RST<0x18, 16>,
+	LDH<$(a8),A, 12>,	POP<HL, 12>,		LD<$(C),A, 8>,		__,					__,					PUSH<HL, 16>,		AND<A,d8, 8>,		RST<0x20, 16>,		ADD<SP,r8, 16>,		JP<$(HL), 4>,		LD<$(a16),A, 16>,	__,					__,					__,					XOR<A,d8, 8>,		RST<0x28, 16>,
+	LDH<A,$(a8), 12>,	POP<AF, 12>,		LD<A,$(C), 8>,		DI<4>,				__,					PUSH<AF, 16>,		OR<A,d8, 8>,		RST<0x30, 16>,		LD_SPr8<HL, 12>,	LD<HL,SP, 8>,		LD<A,$(a16), 16>,	EI<4>,				__,					__,					CP<A,d8, 8>,		RST<0x38, 16>
 };
 
 #undef $
