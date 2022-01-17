@@ -3002,6 +3002,41 @@ u8 Add(u8 a, u8 b, int carry)
 	return r;
 }
 
+u8 Sub(u8 a, u8 b, int carry)
+{
+	bool h;
+	bool c;
+	u8 r = 0;
+
+	for (int i = 0; i < 4; ++i)
+	{
+		int index = 1 << i;
+		int abit = (a & index) ? 1 : 0;
+		int bbit = (b & index) ? 1 : 0;
+		int rbit = (abit - bbit) - carry;
+
+		carry = (rbit & 0x10) ? 1 : 0;
+		int v = (rbit & 0b01) ? index : 0;
+		r = r | v;
+	}
+	h = carry == 0;
+
+	for (int i = 4; i < 8; ++i)
+	{
+		int index = 1 << i;
+		int abit = (a & index) ? 1 : 0;
+		int bbit = (b & index) ? 1 : 0;
+		int rbit = (abit - bbit) - carry;
+
+		carry = (rbit & 0x10) ? 1 : 0;
+		int v = (rbit & 0b01) ? index : 0;
+		r = r | v;
+	}
+	c = carry == 0;
+
+	SetFlags(_, _, h, c);
+	return r;
+}
 
 
 
@@ -3087,122 +3122,228 @@ std::size_t ADC()
 	return cost;
 }
 
-// todo(luke) : implement methods bellow this
-
 template <class DST, class SRC, std::size_t cost>
 std::size_t SUB()
 {
-	//static_assert(DST::size == SRC::size);
-	auto a = DST::Get();
-	auto b = SRC::Get();
-	DST::Set(a - b);
+	u8 a = SRC::Get();
+	u8 b = DST::Get();
+	u8 r = Sub(a, b, 0);
+	DST::Set(r);
+
+	bool z = r == 0;
+	SetFlags(z, 1, _, _);
 	return cost;
 }
 
 template <class DST, class SRC, std::size_t cost>
 std::size_t SBC()
 {
-	//static_assert(DST::size == SRC::size);
-	auto a = DST::Get();
-	auto b = SRC::Get();
-	DST::Set(a - b);	// todo(luke) : implement sub with carry
+	u8 a = SRC::Get();
+	u8 b = DST::Get();
+	int carry = (reg.F & (u8)Flags::C) ? 1 : 0;
+	u8 r = Sub(a, b, 0);
+	DST::Set(r);
+
+	bool z = r == 0;
+	SetFlags(z, 1, _, _);
 	return cost;
 }
 
 template <class DST, class SRC, std::size_t cost>
 std::size_t AND()
 {
-	//static_assert(DST::size == SRC::size);
-	auto a = DST::Get();
-	auto b = SRC::Get();
-	DST::Set(a & b);	// todo(luke) : implement and properly
+	u8 a = DST::Get();
+	u8 b = SRC::Get();
+	u8 r = a & b;
+	DST::Set(r);
+
+	bool z = r == 0;
+	SetFlags(z, 0, 1, 0);
 	return cost;
 }
 
 template <class DST, class SRC, std::size_t cost>
 std::size_t XOR()
 {
-	//static_assert(DST::size == SRC::size);
-	auto a = DST::Get();
-	auto b = SRC::Get();
-	DST::Set(a ^ b);	// todo(luke) : implement xor properly
+	u8 a = DST::Get();
+	u8 b = SRC::Get();
+	u8 r = a ^ b;
+	DST::Set(r);
+
+	bool z = r == 0;
+	SetFlags(z, 0, 0, 0);
 	return cost;
 }
 
 template <class DST, class SRC, std::size_t cost>
 std::size_t OR()
 {
-	// todo(luke) : implement the compare operation, think this just sets flags
+	u8 a = DST::Get();
+	u8 b = SRC::Get();
+	u8 r = a | b;
+	DST::Set(r);
 
-	////static_assert(DST::size == SRC::size);
-	//auto a = DST::Get();
-	//auto b = SRC::Get();
-	//DST::Set(a | b);
+	bool z = r == 0;
+	SetFlags(z, 0, 0, 0);
 	return cost;
 }
 
-template <class DST, class SRC, std::size_t cost>
+template <class REG, class SRC, std::size_t cost>
 std::size_t CP()
 {
-	//static_assert(DST::size == SRC::size);
-	auto a = DST::Get();
-	auto b = SRC::Get();
-	DST::Set(a & b);	// todo(luke) : implement sub with carry
+	u8 a = SRC::Get();
+	u8 b = REG::Get();
+	u8 r = Sub(a, b, 0);
+
+	bool z = r == 0;
+	SetFlags(z, 1, _, _);
 	return cost;
 }
 
 template <class DST, std::size_t cost>
 std::size_t INC()
 {
-	auto a = DST::Get();
-	Math::Inc(a);
-	DST::Set(a);
-	return cost;
+	if constexpr (DST::size == 8)
+	{
+		u8 a = DST::Get();
+		u8 r = a++;
+		DST::Set(r);
+
+		bool z = r == 0;
+		bool h = (a & 0x0F) == 0x0F;
+		SetFlags(z, 0, h, _);
+		return cost;
+	}
+	else
+	{
+		u16 a = DST::Get();
+		u16 r = a++;
+		DST::Set(r);
+
+		return cost;
+	}
 }
 
 template <class DST, std::size_t cost>
 std::size_t DEC()
 {
-	auto a = DST::Get();
-	Math::Dec(a);
-	DST::Set(a);
-	return cost;
+	if constexpr (DST::size == 8)
+	{
+		u8 a DST::Get();
+		u8 r = a--;
+		DST::Set(r);
+
+		bool z = r == 0;
+		bool h = (a & 0x0F) != 0;
+		SetFlags(z, 1, h, _);
+		return costl
+	}
+	else
+	{
+		u16 a = DST::Get();
+		u16 r = a--;
+		DST::Set(r);
+
+		return cost;
+	}
 }
 
 template <std::size_t cost>
 std::size_t RLCA()
 {
-	// todo(luke) : implement whatever this is
+	u8 a = A:Get();
+	bool c = a & 0x80;
+	u8 r = (a << 1) | int(c);
+
+	A::Set(r);
+	SetFlags(0, 0, 0, c);
 	return cost;
 }
 
 template <std::size_t cost>
 std::size_t RLA()
 {
-	// todo(luke) : implement whatever this is
+	u8 a = A::Get();
+	bool c = reg.F & u8(Flags::C);
+	u8 r = (a << 1) | int(c);
+
+	A::Set(r);
+	c = a & 0x80;
+	SetFlags(0, 0, 0, c);
 	return cost;
 }
 
 template <std::size_t cost>
 std::size_t RRCA()
 {
-	// todo(luke) : implement whatever this is
+	u8 a = A:Get();
+	bool c = a & 0x01;
+	u8 r = (a >> 1) | (c ? 0x80 : 0);
+
+	A::Set(r);
+	SetFlags(0, 0, 0, c);
 	return cost;
 }
 
 template <std::size_t cost>
 std::size_t RRA()
 {
-	// todo(luke) : implement whatever this is
+	u8 a = A::Get();
+	bool c = reg.F & u8(Flags::C);
+	u8 r = (a >> 1) | (c ? 0x80 : 0);
+
+	A::Set(r);
+	c = a & 0x01;
+	SetFlags(0, 0, 0, c);
 	return cost;
 }
 
 template <std::size_t cost>
 std::size_t DAA()
 {
-	// todo(luke) : implement whatever this is
+	// allows two binary coded decimal values to be added or subtracted using the normal ADD/SUB operations and store the result in A
+	// then DAA can be run restore the A register to the BCD representation of the result
+	// i assume this is used to scores/timers etc so they are easier to convert to individual decimal digit tiles
+
+	bool negative = (reg.F & (u8)Flags::N);
+	bool carry = (reg.F & (u8)Flags::C);
+	bool hcarry = (reg.F & (u8)Flags::H);
+
+	u8 a = A::Get();
+	bool c = false;
+
+	if (negative)
+	{
+		if (carry)
+		{
+			a -= 0x60;
+			c = true;
+		}
+		if (hcarry)
+		{
+			a -= 0x06;
+		}
+	}
+	else
+	{
+		if (carry || a > 0x99)
+		{
+			a += 0x60;
+			c = true;
+		}
+		if (hcarry || (a & 0xF0) > 0x09)
+		{
+			a += 0x06;
+		}
+	}
+
+	A::Set(a);
+	bool z = a == 0;
+	SetFlags(z, _, 0, c);
 	return cost;
 }
+
+// todo(luke) : continue on from here
 
 template <std::size_t cost>
 std::size_t CPL()
