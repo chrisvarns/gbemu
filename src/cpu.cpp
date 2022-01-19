@@ -2966,6 +2966,22 @@ void SetFlags(int Z, int N, int H, int C) // todo(luke) : more efficient flag se
 const int _ = -1;
 
 
+void Push(u16 value)
+{
+	u16split s; s.Full = value;
+	Bus::StoreU8(--reg.SP, s.L);
+	Bus::StoreU8(--reg.SP, s.L);
+}
+
+u16 Pop()
+{
+	u16split s;
+	s.H = Bus::LoadU8(reg.SP++);
+	s.L = Bus::LoadU8(reg.SP++);
+	return s.Full;
+}
+
+
 u8 Add(u8 a, u8 b, int carry)
 {
 	bool h;
@@ -3343,26 +3359,44 @@ std::size_t DAA()
 	return cost;
 }
 
-// todo(luke) : continue on from here
-
 template <std::size_t cost>
 std::size_t CPL()
 {
-	// todo(luke) : implement whatever this is
+	u8 a = A::Get();
+	a = ~a;
+
+	A::Set(a);
+	SetFlags(_, 1, 1, _);
 	return cost;
 }
 
 template <std::size_t cost>
-std::size_t SFC()
+std::size_t SCF()
 {
-	// todo(luke) : implement whatever this is
+	SetFlags(_, 0, 0, 1);
 	return cost;
 }
 
 template <std::size_t cost>
 std::size_t CCF()
 {
-	// todo(luke) : implement whatever this is
+	bool c = reg.F & (u8)Flags::C;
+	SetFlags(_, 0, 0, !c);
+	return cost;
+}
+
+template <std::size_t cost>
+std::size_t HALT()
+{
+	if (interruptMasterEnable)
+	{
+		bHalted = true;
+	}
+	else
+	{
+		// todo if (GB/SGB/GBP)		todo(vanrz) : implement what this is?
+		bRepeatPCPostHalt = true;
+	}
 	return cost;
 }
 
@@ -3373,28 +3407,21 @@ std::size_t STOP()
 	return cost;
 }
 
-template <std::size_t cost>
-std::size_t HALT()
-{
-	// todo(luke) : halt the cpu somehow
-	return cost;
-}
-
 template <class SRC, std::size_t cost>
 std::size_t JR()
 {
-	s8 offset = SRC::Get();
-	reg.PC += offset;			// todo(luke) : does this signed unsinged math work
+	u16 offset = SRC::Get();
+	reg.PC += offset;
 	return cost;
 }
 
 template <class CONDITION, class SRC, std::size_t pass, std::size_t fail>
 std::size_t JR()
 {
-	s8 offset = SRC::Get();
+	u16 offset = SRC::Get();
 	if (CONDITION::IsMet())
 	{
-		reg.PC += offset;		// todo(luke) : does this signed unsinged math work
+		reg.PC += offset;
 		return pass;
 	}
 	else
@@ -3403,94 +3430,130 @@ std::size_t JR()
 	}
 }
 
-template <class CONDITION, class SRC, std::size_t pass, std::size_t fail>
-std::size_t JP()
-{
-	// todo(luke) : implement jp
-	return pass;
-}
-
 template <class SRC, std::size_t cost>
 std::size_t JP()
 {
-	// todo(luke) : implement jp
+	u16 a = SRC::Get();
+	reg.PC = a;
+	return cost;
+}
+
+template <class CONDITION, class SRC, std::size_t pass, std::size_t fail>
+std::size_t JP()
+{
+	u16 a = SRC::Get();
+	if (CONDITION::IsMet())
+	{
+		reg.PC = a;
+		return pass;
+	}
+	else
+	{
+		return fail;
+	}
+}
+
+template <std::size_t cost>
+std::size_t RET()
+{
+	u16 a = Pop();
+	reg.HL = a;
 	return cost;
 }
 
 template <class CONDITION, std::size_t pass, std::size_t fail >
 std::size_t RET()
 {
-	// todo(luke) : implement ret
-	return pass;
-}
-
-template <std::size_t cost>
-std::size_t RET()
-{
-	// todo(luke) : implement ret
-	return cost;
+	if (CONDITION::IsMet())
+	{
+		u16 a = Pop();
+		reg.HL = a;
+		return pass;
+	}
+	else
+	{
+		return fail;
+	}
 }
 
 template <std::size_t cost>
 std::size_t RETI()
 {
-	// todo(luke) : implement reti
+	u16 a = Pop();
+	reg.HL = a;
+	interruptEnableDelay = 1;
 	return cost;
 }
 
 template <class SRC, std::size_t cost>
-std::size_t POP()
+std::size_t PUSH()
 {
-	// todo(luke) : implement pop
+	u16 v = SRC::Get();
+	Push(v);
 	return cost;
 }
 
 template <class DST, std::size_t cost>
-std::size_t PUSH()
+std::size_t POP()
 {
-	// todo(luke) : implement push
+	u16 v = Pop();
+	DST::Set(v);
+	return cost;
+}
+
+template <class SRC, std::size_t cost>
+std::size_t CALL()
+{
+	u16 a = SRC::Get();
+	Push(reg.PC);
+	reg.PC = a;
 	return cost;
 }
 
 template <class CONDITION, class SRC, std::size_t pass, std::size_t fail>
 std::size_t CALL()
 {
-	// todo(luke) : implement call
-	return pass;
+	u16 a = SRC::Get();
+	if (CONDITION::IsMet())
+	{
+		Push(reg.PC);
+		reg.PC = a;
+		return pass;
+	}
+	else
+	{
+		return fail;
+	}
 }
 
-template <class SRC, std::size_t cost>
-std::size_t CALL()
-{
-	// todo(luke) : implement call
-	return cost;
-}
-
-template <std::size_t addr, std::size_t cost>
+template <u16 addr, std::size_t cost>
 std::size_t RST()
 {
-	// todo(luke) : implement rts
-	return cost;
-}
-
-template <std::size_t cost>
-std::size_t DI()
-{
-	// todo(luke) : implement di
+	Push(reg.PC);
+	reg.PC = addr;
 	return cost;
 }
 
 template <std::size_t cost>
 std::size_t EI()
 {
-	// todo(luke) : implement ei
+	interruptEnableDelay = 1;
 	return cost;
 }
 
+template <std::size_t cost>
+std::size_t DI()
+{
+	interruptDisableDelay = 1;
+	return cost;
+}
+
+operation exops[]; // todo(luke) : move the forward declerations somewhere a bit better
+
 std::size_t PREFIX_CB()
 {
-	// todo(luke) : call the secondary operation
-	return 4;
+	u8 opcode = Bus::LoadU8(reg.PC++);
+	return exops[opcode];
 }
 
 std::size_t __()
@@ -3513,7 +3576,7 @@ operation operations[] =
 	NOP<4>,				LD<BC,d16, 12>,		LD<$(BC),A, 8>,		INC<BC, 8>,			INC<B, 4>,			DEC<B, 4>,			LD<B,d8, 8>,		RLCA<4>,			LD<$(a16),SP, 20>,	ADD<HL,BC, 8>,		LD<A,$(BC), 8>,		DEC<BC, 8>,			INC<C, 4>,			DEC<C, 4>,			LD<C,d8, 8>,		RRCA<4>,
 	STOP<4>,			LD<DE,d16, 12>,		LD<$(DE),A, 8>,		INC<DE, 8>,			INC<D, 4>,			DEC<D, 4>,			LD<D,d8, 8>,		RLA<4>,				JR<r8, 12>,			ADD<HL,DE, 8>,		LD<A,$(DE), 8>,		DEC<DE, 8>,			INC<E, 4>,			DEC<E, 4>,			LD<E,d8, 8>,		RRA<4>,
 	JR<NZ,r8, 12,8>,	LD<HL,d16, 12>,		LD<i(HL),A, 8>,		INC<HL, 8>,			INC<H, 4>,			DEC<H, 4>,			LD<H,d8, 8>,		DAA<4>,				JR<Z,r8, 12,8>,		ADD<HL,HL, 8>,		LD<A,i(HL), 8>,		DEC<HL, 8>,			INC<L, 4>,			DEC<L, 4>,			LD<L,d8, 8>,		CPL<4>,
-	JR<NC,r8, 12,8>,	LD<SP,d16, 12>,		LD<d(HL),A, 8>,		INC<SP, 8>,			INC<$(HL), 12>,		DEC<$(HL), 12>,		LD<$(HL),d8, 12>,	SFC<4>,				JR<C,r8, 12,8>,		ADD<HL,SP, 8>,		LD<A,d(HL), 8>,		DEC<SP, 8>,			INC<A, 4>,			DEC<A, 4>,			LD<A,d8, 8>,		CCF<4>,
+	JR<NC,r8, 12,8>,	LD<SP,d16, 12>,		LD<d(HL),A, 8>,		INC<SP, 8>,			INC<$(HL), 12>,		DEC<$(HL), 12>,		LD<$(HL),d8, 12>,	SCF<4>,				JR<C,r8, 12,8>,		ADD<HL,SP, 8>,		LD<A,d(HL), 8>,		DEC<SP, 8>,			INC<A, 4>,			DEC<A, 4>,			LD<A,d8, 8>,		CCF<4>,
 	LD<B,B, 4>,			LD<B,C, 4>,			LD<B,D, 4>,			LD<B,E, 4>,			LD<B,H, 4>,			LD<B,L, 4>,			LD<B,$(HL), 8>,		LD<B,A, 4>,			LD<C,B, 4>,			LD<C,C, 4>,			LD<C,D, 4>,			LD<C,E, 4>,			LD<C,H, 4>,			LD<C,L, 4>,			LD<C,$(HL), 8>,		LD<C,A, 4>,
 	LD<D,B, 4>,			LD<D,C, 4>,			LD<D,D, 4>,			LD<D,E, 4>,			LD<D,H, 4>,			LD<D,L, 4>,			LD<D,$(HL), 8>,		LD<D,A, 4>,			LD<E,B, 4>,			LD<E,C, 4>,			LD<E,D, 4>,			LD<E,E, 4>,			LD<E,H, 4>,			LD<E,L, 4>,			LD<E,$(HL), 8>,		LD<E,A, 4>,
 	LD<H,B, 4>,			LD<H,C, 4>,			LD<H,D, 4>,			LD<H,E, 4>,			LD<H,H, 4>,			LD<H,L, 4>,			LD<H,$(HL), 8>,		LD<H,A, 4>,			LD<L,B, 4>,			LD<L,C, 4>,			LD<L,D, 4>,			LD<L,E, 4>,			LD<L,H, 4>,			LD<L,L, 4>,			LD<L,$(HL), 8>,		LD<L,A, 4>,
@@ -3524,8 +3587,14 @@ operation operations[] =
 	OR<A,B, 4>,			OR<A,C, 4>,			OR<A,D, 4>,			OR<A,E, 4>,			OR<A,H, 4>,			OR<A,L, 4>,			OR<A,$(HL), 8>,		OR<A,A, 4>,			CP<A,B, 4>,			CP<A,C, 4>,			CP<A,D, 4>,			CP<A,E, 4>,			CP<A,H, 4>,			CP<A,L, 4>,			CP<A,$(HL), 8>,		CP<A,A, 4>,
 	RET<NZ, 20,8>,		POP<BC, 12>,		JP<NZ,a16, 16,12>,	JP<a16, 16>,		CALL<NZ,a16, 24,12>,PUSH<BC, 16>,		ADD<A,d8, 8>,		RST<0x00, 16>,		RET<Z, 20,8>,		RET<16>,			JP<Z,a16, 16,12>,	PREFIX_CB,			CALL<Z,a16, 24,12>,	CALL<a16, 24>,		ADC<A,d8, 8>,		RST<0x08, 16>,
 	RET<NC, 20,8>,		POP<DE, 12>,		JP<NC,a16, 16,12>,	__,					CALL<NC,a16, 24,12>,PUSH<DE, 16>,		SUB<A,d8, 8>,		RST<0x10, 16>,		RET<C, 20,8>,		RETI<16>,			JP<C,a16, 16,12>,	__,					CALL<C,a16, 24,12>,	__,					SBC<A,d8, 8>,		RST<0x18, 16>,
-	LDH<$(a8),A, 12>,	POP<HL, 12>,		LD<$(C),A, 8>,		__,					__,					PUSH<HL, 16>,		AND<A,d8, 8>,		RST<0x20, 16>,		ADD<SP,r8, 16>,		JP<$(HL), 4>,		LD<$(a16),A, 16>,	__,					__,					__,					XOR<A,d8, 8>,		RST<0x28, 16>,
+	LDH<$(a8),A, 12>,	POP<HL, 12>,		LD<$(C),A, 8>,		__,					__,					PUSH<HL, 16>,		AND<A,d8, 8>,		RST<0x20, 16>,		ADD<SP,r8, 16>,		JP<HL, 4>,			LD<$(a16),A, 16>,	__,					__,					__,					XOR<A,d8, 8>,		RST<0x28, 16>,
 	LDH<A,$(a8), 12>,	POP<AF, 12>,		LD<A,$(C), 8>,		DI<4>,				__,					PUSH<AF, 16>,		OR<A,d8, 8>,		RST<0x30, 16>,		LD_SPr8<HL, 12>,	LD<HL,SP, 8>,		LD<A,$(a16), 16>,	EI<4>,				__,					__,					CP<A,d8, 8>,		RST<0x38, 16>
+};
+
+operation exops[] =
+{
+	// x0				// x1				// x2				// x3				// x4				// x5				// x6				// x7				// x8				// x9				// xA				// xB				// xC				// xD				// xE				// xF
+	__
 };
 
 #undef $
