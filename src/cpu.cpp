@@ -2885,6 +2885,7 @@ template <class SRC>
 class UREF
 {
 public:
+	static const std::size_t size = 8;
 	static u8 Get()
 	{
 		u16 addr = SRC::GetAddr();
@@ -2912,6 +2913,7 @@ template <class SRC>
 class IREF
 {
 public:
+	static const std::size_t size = 8;
 	static u8 Get()
 	{
 		u16 addr = SRC::GetAddr();
@@ -2931,6 +2933,7 @@ template <class SRC>
 class DREF
 {
 public:
+	static const std::size_t size = 8;
 	static u8 Get()
 	{
 		u16 addr = SRC::GetAddr();
@@ -3245,14 +3248,14 @@ std::size_t DEC()
 {
 	if constexpr (DST::size == 8)
 	{
-		u8 a DST::Get();
+		u8 a = DST::Get();
 		u8 r = a--;
 		DST::Set(r);
 
 		bool z = r == 0;
 		bool h = (a & 0x0F) != 0;
 		SetFlags(z, 1, h, _);
-		return costl
+		return cost;
 	}
 	else
 	{
@@ -3264,54 +3267,82 @@ std::size_t DEC()
 	}
 }
 
-template <std::size_t cost>
-std::size_t RLCA()
+template <class SRC, std::size_t cost>
+std::size_t RLC()
 {
-	u8 a = A:Get();
+	u8 a = SRC::Get();
 	bool c = a & 0x80;
 	u8 r = (a << 1) | int(c);
 
-	A::Set(r);
-	SetFlags(0, 0, 0, c);
+	SRC::Set(r);
+	bool z = r == 0;
+	SetFlags(z, 0, 0, c);
+	return cost;
+}
+
+template <std::size_t cost>
+std::size_t RLCA()
+{
+	return RLC<A, cost>();
+}
+
+template <class SRC, std::size_t cost>
+std::size_t RL()
+{
+	u8 a = SRC::Get();
+	bool c = reg.F & u8(Flags::C);
+	u8 r = (a << 1) | int(c);
+
+	SRC::Set(r);
+	c = a & 0x80;
+	bool z = r == 0;
+	SetFlags(z, 0, 0, c);
 	return cost;
 }
 
 template <std::size_t cost>
 std::size_t RLA()
 {
-	u8 a = A::Get();
-	bool c = reg.F & u8(Flags::C);
-	u8 r = (a << 1) | int(c);
+	return RL<A, cost>();
+}
 
-	A::Set(r);
-	c = a & 0x80;
-	SetFlags(0, 0, 0, c);
+template <class SRC, std::size_t cost>
+std::size_t RRC()
+{
+	u8 a = SRC::Get();
+	bool c = a & 0x01;
+	u8 r = (a >> 1) | (c ? 0x80 : 0);
+
+	SRC::Set(r);
+	bool z = r == 0;
+	SetFlags(z, 0, 0, c);
 	return cost;
 }
 
 template <std::size_t cost>
 std::size_t RRCA()
 {
-	u8 a = A:Get();
-	bool c = a & 0x01;
+	return RRC<A, cost>();
+}
+
+template <class SRC, std::size_t cost>
+std::size_t RR()
+{
+	u8 a = SRC::Get();
+	bool c = reg.F & u8(Flags::C);
 	u8 r = (a >> 1) | (c ? 0x80 : 0);
 
-	A::Set(r);
-	SetFlags(0, 0, 0, c);
+	SRC::Set(r);
+	c = a & 0x01;
+	bool z = r == 0;
+	SetFlags(z, 0, 0, c);
 	return cost;
 }
 
 template <std::size_t cost>
 std::size_t RRA()
 {
-	u8 a = A::Get();
-	bool c = reg.F & u8(Flags::C);
-	u8 r = (a >> 1) | (c ? 0x80 : 0);
-
-	A::Set(r);
-	c = a & 0x01;
-	SetFlags(0, 0, 0, c);
-	return cost;
+	return RR<A, cost>();
 }
 
 template <std::size_t cost>
@@ -3548,12 +3579,14 @@ std::size_t DI()
 	return cost;
 }
 
+typedef std::size_t(*operation)(void);
+
 operation exops[]; // todo(luke) : move the forward declerations somewhere a bit better
 
 std::size_t PREFIX_CB()
 {
 	u8 opcode = Bus::LoadU8(reg.PC++);
-	return exops[opcode];
+	return exops[opcode]();
 }
 
 std::size_t __()
@@ -3562,8 +3595,87 @@ std::size_t __()
 	return 4;
 }
 
+template <class SRC, std::size_t cost>
+std::size_t SLA()
+{
+	u8 a = SRC::Get();
+	u8 r = a << 1;
 
-typedef std::size_t(*operation)(void);
+	SRC::Set(r);
+	bool c = a & 0x80;
+	bool z = r == 0;
+	SetFlags(z, 0, 0, c);
+	return cost;
+}
+
+template <class SRC, std::size_t cost>
+std::size_t SRA()
+{
+	u8 a = SRC::Get();
+	u8 r = (a & 0x80) | ((a >> 1) & 0x7F);
+
+	SRC::Set(r);
+	bool c = a & 0x01;
+	bool z = r == 0;
+	SetFlags(z, 0, 0, c);
+	return cost;
+}
+
+template <class SRC, std::size_t cost>
+std::size_t SWAP()
+{
+	u8 a = SRC::Get();
+	u8 r = ((a << 4) & 0xF0) | ((a >> 4) & 0x0F);
+
+	SRC::Set(r);
+	bool z = r == 0;
+	SetFlags(z, 0, 0, 0);
+	return cost;
+}
+
+template <class SRC, std::size_t cost>
+std::size_t SRL()
+{
+	u8 a = SRC::Get();
+	u8 r = (a >> 1) & 0x7F;
+
+	SRC::Set(r);
+	bool c = a & 0x01;
+	bool z = r == 0;
+	SetFlags(z, 0, 0, c);
+	return cost;
+}
+
+template <int I, class SRC, std::size_t cost>
+std::size_t BIT()
+{
+	u8 a = SRC::Get();
+	bool z = (a & (1 << I)) == 0;
+	SetFlags(z, 0, 1, _);
+	return cost;
+}
+
+template <int I, class SRC, std::size_t cost>
+std::size_t RES()
+{
+	u8 a = SRC::Get();
+	u8 r = a | (1 << I);
+
+	SRC::Set(r);
+	return cost;
+}
+
+template <int I, class SRC, std::size_t cost>
+std::size_t SET()
+{
+	u8 a = SRC::Get();
+	u8 r = a & ~(1 << I);
+
+	SRC::Set(r);
+	return cost;
+}
+
+
 
 
 #define $(_value_) UREF<_value_>
@@ -3594,7 +3706,24 @@ operation operations[] =
 operation exops[] =
 {
 	// x0				// x1				// x2				// x3				// x4				// x5				// x6				// x7				// x8				// x9				// xA				// xB				// xC				// xD				// xE				// xF
-	__
+	RLC<B, 8>,			RLC<C, 8>,			RLC<D, 8>,			RLC<E, 8>,			RLC<H, 8>,			RLC<L, 8>,			RLC<$(HL), 16>,		RLC<A, 8>,			RRC<B, 8>,			RRC<C, 8>,			RRC<D, 8>,			RRC<E, 8>,			RRC<H, 8>,			RRC<L, 8>,			RRC<$(HL), 16>,		RRC<A, 8>,
+	RL<B, 8>,			RL<C, 8>,			RL<D, 8>,			RL<E, 8>,			RL<H, 8>,			RL<L, 8>,			RL<$(HL), 16>,		RL<A, 8>,			RR<B, 8>,			RR<C, 8>,			RR<D, 8>,			RR<E, 8>,			RR<H, 8>,			RR<L, 8>,			RR<$(HL), 16>,		RR<A, 8>,
+	SLA<B, 8>,			SLA<C, 8>,			SLA<D, 8>,			SLA<E, 8>,			SLA<H, 8>,			SLA<L, 8>,			SLA<$(HL), 16>,		SLA<A, 8>,			SRA<B, 8>,			SRA<C, 8>,			SRA<D, 8>,			SRA<E, 8>,			SRA<H, 8>,			SRA<L, 8>,			SRA<$(HL), 16>,		SRA<A, 8>,
+	SWAP<B, 8>,			SWAP<C, 8>,			SWAP<D, 8>,			SWAP<E, 8>,			SWAP<H, 8>,			SWAP<L, 8>,			SWAP<$(HL), 16>,	SWAP<A, 8>,			SRL<B, 8>,			SRL<C, 8>,			SRL<D, 8>,			SRL<E, 8>,			SRL<H, 8>,			SRL<L, 8>,			SRL<$(HL), 16>,		SRL<A, 8>,
+	BIT<0,B, 8>,		BIT<0,C, 8>,		BIT<0,D, 8>,		BIT<0,E, 8>,		BIT<0,H, 8>,		BIT<0,L, 8>,		BIT<0,$(HL), 12>,	BIT<0,A, 8>,		BIT<1,B, 8>,		BIT<1,C, 8>,		BIT<1,D, 8>,		BIT<1,E, 8>,		BIT<1,H, 8>,		BIT<1,L, 8>,		BIT<1,$(HL), 12>,	BIT<1,A, 8>,
+	BIT<2,B, 8>,		BIT<2,C, 8>,		BIT<2,D, 8>,		BIT<2,E, 8>,		BIT<2,H, 8>,		BIT<2,L, 8>,		BIT<2,$(HL), 32>,	BIT<2,A, 8>,		BIT<3,B, 8>,		BIT<3,C, 8>,		BIT<3,D, 8>,		BIT<3,E, 8>,		BIT<3,H, 8>,		BIT<3,L, 8>,		BIT<3,$(HL), 32>,	BIT<3,A, 8>,
+	BIT<4,B, 8>,		BIT<4,C, 8>,		BIT<4,D, 8>,		BIT<4,E, 8>,		BIT<4,H, 8>,		BIT<4,L, 8>,		BIT<4,$(HL), 52>,	BIT<4,A, 8>,		BIT<5,B, 8>,		BIT<5,C, 8>,		BIT<5,D, 8>,		BIT<5,E, 8>,		BIT<5,H, 8>,		BIT<5,L, 8>,		BIT<5,$(HL), 52>,	BIT<5,A, 8>,
+	BIT<6,B, 8>,		BIT<6,C, 8>,		BIT<6,D, 8>,		BIT<6,E, 8>,		BIT<6,H, 8>,		BIT<6,L, 8>,		BIT<6,$(HL), 72>,	BIT<6,A, 8>,		BIT<7,B, 8>,		BIT<7,C, 8>,		BIT<7,D, 8>,		BIT<7,E, 8>,		BIT<7,H, 8>,		BIT<7,L, 8>,		BIT<7,$(HL), 72>,	BIT<7,A, 8>,
+	RES<0,B, 8>,		RES<0,C, 8>,		RES<0,D, 8>,		RES<0,E, 8>,		RES<0,H, 8>,		RES<0,L, 8>,		RES<0,$(HL), 12>,	RES<0,A, 8>,		RES<1,B, 8>,		RES<1,C, 8>,		RES<1,D, 8>,		RES<1,E, 8>,		RES<1,H, 8>,		RES<1,L, 8>,		RES<1,$(HL), 12>,	RES<1,A, 8>,
+	RES<2,B, 8>,		RES<2,C, 8>,		RES<2,D, 8>,		RES<2,E, 8>,		RES<2,H, 8>,		RES<2,L, 8>,		RES<2,$(HL), 32>,	RES<2,A, 8>,		RES<3,B, 8>,		RES<3,C, 8>,		RES<3,D, 8>,		RES<3,E, 8>,		RES<3,H, 8>,		RES<3,L, 8>,		RES<3,$(HL), 32>,	RES<3,A, 8>,
+	RES<4,B, 8>,		RES<4,C, 8>,		RES<4,D, 8>,		RES<4,E, 8>,		RES<4,H, 8>,		RES<4,L, 8>,		RES<4,$(HL), 52>,	RES<4,A, 8>,		RES<5,B, 8>,		RES<5,C, 8>,		RES<5,D, 8>,		RES<5,E, 8>,		RES<5,H, 8>,		RES<5,L, 8>,		RES<5,$(HL), 52>,	RES<5,A, 8>,
+	RES<6,B, 8>,		RES<6,C, 8>,		RES<6,D, 8>,		RES<6,E, 8>,		RES<6,H, 8>,		RES<6,L, 8>,		RES<6,$(HL), 72>,	RES<6,A, 8>,		RES<7,B, 8>,		RES<7,C, 8>,		RES<7,D, 8>,		RES<7,E, 8>,		RES<7,H, 8>,		RES<7,L, 8>,		RES<7,$(HL), 72>,	RES<7,A, 8>,
+	SET<0,B, 8>,		SET<0,C, 8>,		SET<0,D, 8>,		SET<0,E, 8>,		SET<0,H, 8>,		SET<0,L, 8>,		SET<0,$(HL), 12>,	SET<0,A, 8>,		SET<1,B, 8>,		SET<1,C, 8>,		SET<1,D, 8>,		SET<1,E, 8>,		SET<1,H, 8>,		SET<1,L, 8>,		SET<1,$(HL), 12>,	SET<1,A, 8>,
+	SET<2,B, 8>,		SET<2,C, 8>,		SET<2,D, 8>,		SET<2,E, 8>,		SET<2,H, 8>,		SET<2,L, 8>,		SET<2,$(HL), 32>,	SET<2,A, 8>,		SET<3,B, 8>,		SET<3,C, 8>,		SET<3,D, 8>,		SET<3,E, 8>,		SET<3,H, 8>,		SET<3,L, 8>,		SET<3,$(HL), 32>,	SET<3,A, 8>,
+	SET<4,B, 8>,		SET<4,C, 8>,		SET<4,D, 8>,		SET<4,E, 8>,		SET<4,H, 8>,		SET<4,L, 8>,		SET<4,$(HL), 52>,	SET<4,A, 8>,		SET<5,B, 8>,		SET<5,C, 8>,		SET<5,D, 8>,		SET<5,E, 8>,		SET<5,H, 8>,		SET<5,L, 8>,		SET<5,$(HL), 52>,	SET<5,A, 8>,
+	SET<6,B, 8>,		SET<6,C, 8>,		SET<6,D, 8>,		SET<6,E, 8>,		SET<6,H, 8>,		SET<6,L, 8>,		SET<6,$(HL), 72>,	SET<6,A, 8>,		SET<7,B, 8>,		SET<7,C, 8>,		SET<7,D, 8>,		SET<7,E, 8>,		SET<7,H, 8>,		SET<7,L, 8>,		SET<7,$(HL), 72>,	SET<7,A, 8>
+
+
 };
 
 #undef $
