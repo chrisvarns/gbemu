@@ -8,7 +8,6 @@
 #include "math.h"
 #include "types.h"
 
-
 Registers reg;
 
 static bool bHalted = false;
@@ -107,6 +106,17 @@ void CPU::Step()
 	{
 		if (cycles == 0)
 		{
+			//keeping this around as its handy if we ever need to keep a log of register changes per ops for debuggin
+			//---
+			//freopen("output.txt", "w", stdout);
+			//std::cout << "PC:" << std::setfill('0') << std::setw(4) << std::hex << reg.PC << " ";
+			//std::cout << "SP:" << std::setfill('0') << std::setw(4) << std::hex << reg.SP << " ";
+			//std::cout << "AF:" << std::setfill('0') << std::setw(4) << std::hex << reg.AF << " ";
+			//std::cout << "BC:" << std::setfill('0') << std::setw(4) << std::hex << reg.BC << " ";
+			//std::cout << "DE:" << std::setfill('0') << std::setw(4) << std::hex << reg.DE << " ";
+			//std::cout << "HL:" << std::setfill('0') << std::setw(4) << std::hex << reg.HL;
+			//std::cout << std::endl << std::flush;
+
 			// note :	some docs suggest the change happens after the next machine cycle, some suggest after the next opcode is executed.
 			//			After the next machine cycle means reading the next opcode, but not the operands (if there are any) before handling the interrupt.
 			//			I can't reason how this would be safe, so i am taking the "after the next opcode is executed" reading
@@ -535,8 +545,8 @@ std::size_t ADD()
 {
 	if constexpr (DST::size == 8)
 	{
-		u8 a = SRC::Get();
-		u8 b = DST::Get();
+		u8 a = DST::Get();
+		u8 b = SRC::Get();
 		u8 r = Add(a, b, 0);
 		DST::Set(r);
 
@@ -546,8 +556,8 @@ std::size_t ADD()
 	}
 	else
 	{
-		u16split as; as.Full = SRC::Get();
-		u16split bs; bs.Full = DST::Get();
+		u16split as; as.Full = DST::Get();
+		u16split bs; bs.Full = SRC::Get();
 		u16split r{ 0, 0 };
 
 		r.L = Add(as.L, bs.L, 0);
@@ -563,8 +573,8 @@ std::size_t ADD()
 template <class DST, class SRC, std::size_t cost>
 std::size_t ADC()
 {
-	u8 a = SRC::Get();
-	u8 b = DST::Get();
+	u8 a = DST::Get();
+	u8 b = SRC::Get();
 	int carry = (reg.F & (u8)Flags::C) ? 1 : 0;
 	u8 r = Add(a, b, 0);
 	DST::Set(r);
@@ -577,8 +587,8 @@ std::size_t ADC()
 template <class DST, class SRC, std::size_t cost>
 std::size_t SUB()
 {
-	u8 a = SRC::Get();
-	u8 b = DST::Get();
+	u8 a = DST::Get();
+	u8 b = SRC::Get();
 	u8 r = Sub(a, b, 0);
 	DST::Set(r);
 
@@ -590,8 +600,8 @@ std::size_t SUB()
 template <class DST, class SRC, std::size_t cost>
 std::size_t SBC()
 {
-	u8 a = SRC::Get();
-	u8 b = DST::Get();
+	u8 a = DST::Get();
+	u8 b = SRC::Get();
 	int carry = (reg.F & (u8)Flags::C) ? 1 : 0;
 	u8 r = Sub(a, b, 0);
 	DST::Set(r);
@@ -686,7 +696,7 @@ std::size_t DEC()
 		DST::Set(r);
 
 		bool z = r == 0;
-		bool h = (a & 0x0F) != 0;
+		bool h = (a & 0x0F) == 0; // todo(luke) : should this be set on carry or when not carrying?
 		SetFlags(z, 1, h, _);
 		return cost;
 	}
@@ -734,9 +744,11 @@ std::size_t RL()
 }
 
 template <std::size_t cost>
-std::size_t RLA()
+std::size_t RLA()	// todo(luke) : check z flag output for other rotate on A operations
 {
-	return RL<A, cost>();
+	std::size_t scost = RL<A, cost>();
+	SetFlags(0, _, _, _);
+	return scost;
 }
 
 template <class SRC, std::size_t cost>
