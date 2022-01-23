@@ -1163,8 +1163,6 @@ operation exops[] =
 	SET<2,B, 8>,		SET<2,C, 8>,		SET<2,D, 8>,		SET<2,E, 8>,		SET<2,H, 8>,		SET<2,L, 8>,		SET<2,$(HL), 32>,	SET<2,A, 8>,		SET<3,B, 8>,		SET<3,C, 8>,		SET<3,D, 8>,		SET<3,E, 8>,		SET<3,H, 8>,		SET<3,L, 8>,		SET<3,$(HL), 32>,	SET<3,A, 8>,
 	SET<4,B, 8>,		SET<4,C, 8>,		SET<4,D, 8>,		SET<4,E, 8>,		SET<4,H, 8>,		SET<4,L, 8>,		SET<4,$(HL), 52>,	SET<4,A, 8>,		SET<5,B, 8>,		SET<5,C, 8>,		SET<5,D, 8>,		SET<5,E, 8>,		SET<5,H, 8>,		SET<5,L, 8>,		SET<5,$(HL), 52>,	SET<5,A, 8>,
 	SET<6,B, 8>,		SET<6,C, 8>,		SET<6,D, 8>,		SET<6,E, 8>,		SET<6,H, 8>,		SET<6,L, 8>,		SET<6,$(HL), 72>,	SET<6,A, 8>,		SET<7,B, 8>,		SET<7,C, 8>,		SET<7,D, 8>,		SET<7,E, 8>,		SET<7,H, 8>,		SET<7,L, 8>,		SET<7,$(HL), 72>,	SET<7,A, 8>
-
-
 };
 
 #undef $

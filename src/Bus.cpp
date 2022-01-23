@@ -1,6 +1,7 @@
 #include "bootrom.h"
 #include "bus.h"
 #include "cartridge.h"
+#include "timer.h"
 #include "constants.h"
 #include "memory.h"
 #include "utils.h"
@@ -17,6 +18,11 @@ inline u8 HandleIORead(u16 address)
 	SpecialRegister special_register = SpecialRegister(address);
 	switch (special_register)
 	{
+	case SpecialRegister::DIV:	return Timer::R_DIV();
+	case SpecialRegister::TIMA: return Timer::R_TIMA();
+	case SpecialRegister::TMA:	return Timer::R_TMA();
+	case SpecialRegister::TAC:	return Timer::R_TAC();
+
 	case SpecialRegister::INTERRUPT_FLAG:
 	case SpecialRegister::SOUND_NR11:
 	case SpecialRegister::SOUND_NR12:
@@ -46,6 +52,11 @@ inline void HandleIOWrite(u16 address, u8 val)
 	SpecialRegister special_register = SpecialRegister(address);
 	switch (special_register)
 	{
+	case SpecialRegister::DIV:	Timer::W_DIV(val);	break;
+	case SpecialRegister::TIMA: Timer::W_TIMA(val); break;
+	case SpecialRegister::TMA:	Timer::W_TMA(val);	break;
+	case SpecialRegister::TAC:	Timer::W_TAC(val);	break;
+
 	case SpecialRegister::INTERRUPT_FLAG:
 	case SpecialRegister::SOUND_NR11:
 	case SpecialRegister::SOUND_NR12:
@@ -107,7 +118,7 @@ u8 Bus::LoadU8(u16 address)
 	}
 	else if (InRange(address, AddressRegion::RAMBANK_SWITCHABLE_START, AddressRegion::RAMBANK_SWITCHABLE_END))
 	{
- 		// 8KB switchable RAM bank
+		// 8KB switchable RAM bank
 		// todo handle RAM bank switching
 		return Memory::LoadU8(address);
 	}

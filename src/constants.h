@@ -8,6 +8,11 @@ const int total_gb_display_bytes = gb_width * gb_height * bytes_per_pixel;
 
 enum class SpecialRegister : u16
 {
+	DIV = 0xFF04,
+	TIMA = 0xFF05,
+	TMA = 0xFF06,
+	TAC = 0xFF07,
+
 	INTERRUPT_FLAG = 0xFF0F,
 	SOUND_NR11 = 0xFF11,
 	SOUND_NR12 = 0xFF12,

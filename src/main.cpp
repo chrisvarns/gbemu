@@ -7,6 +7,7 @@
 #include "cpu.h"
 #include "main.h"
 #include "memory.h"
+#include "timer.h"
 #include "ppu.h"
 
 SDL_Window* g_window;
@@ -43,11 +44,13 @@ int main(int argc, char** argv)
 	BootRom::LoadFromDisk();
 	Cartridge::LoadGameRom();
 
+	Timer::Init();
 	PPU::Init();
 
 	int clock = 0;
 	while (true)
 	{
+		Timer::Step(); // todo(luke) : where should this go in component ordering
 		if ((clock % 4) == 0)
 		{
 			CPU::Step();
